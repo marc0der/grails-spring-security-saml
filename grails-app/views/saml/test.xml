@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+	entityID="http://brian.salenda.es:8080/grails-saml-demo/saml/metadata/alias/defaultAlias">
+	<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+		<ds:SignedInfo>
+			<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+			<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+			<ds:Reference URI="">
+				<ds:Transforms>
+					<ds:Transform
+						Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+					<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+				</ds:Transforms>
+				<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+				<ds:DigestValue>eL+/UrbvBCMJs1gQBdEZHEp4aVQ=</ds:DigestValue>
+			</ds:Reference>
+		</ds:SignedInfo>
+		<ds:SignatureValue>Zwsl/MEIpAKVIvuM9I8hFx4a8dJ/ZsJH5fP+tc33pC03gTrt7dO6dn7mr00/6EiliZaWDr1ok2Ri/3qMsuzKEjjOzDvvxG+eS1kaRj7TqB21g80N3U+0ikOrA2eVyVb058umUE+B81tfUWGOoh746mEhn+c1ajH2zkNJ583nrVw=
+		</ds:SignatureValue>
+		<ds:KeyInfo>
+			<ds:X509Data>
+				<ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
+					LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
+					FTATBgNVBAoTDFJNNSBTb2Z0d2FyZTEMMAoGA1UECxMDUiZEMQ8wDQYDVQQDEwZhcG9sbG8wHhcN
+					MDgxMTI5MjIxNjA0WhcNMDkxMjI4MjIwMDAwWjCBhzEvMC0GCSqGSIb3DQEJARYgdmxhZGltaXIu
+					c2NoYWZlckBybTVzb2Z0d2FyZS5jb20xCzAJBgNVBAYTAkZJMREwDwYDVQQHEwhIZWxzaW5raTEV
+					MBMGA1UEChMMUk01IFNvZnR3YXJlMQwwCgYDVQQLEwNSJkQxDzANBgNVBAMTBmFwb2xsbzCBnzAN
+					BgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArsoEvHts4n4EwloxJNueekYYF8xjoV1AtXHAAW0c+Qtb
+					uEXR8wG1QzSlcasTua+iGsC+wK4T8l0IH9Y3+oVaDVbpzrWr2li9zhJB+htJYZ0t7m+3GEIeNlr1
+					qkUum/uNxUthklrhg2zCVW0b4NFDP/jI4rARsAkGXa7z/AgonrUCAwEAATANBgkqhkiG9w0BAQUF
+					AAOBgQArpq022JktjH3EHw0b4+CFrPzAXFuSd8WXWzoT6YZTgbcLR9K38383mMXoBjHdX3SYr0uF
+					njEwP6gqo8KyzXxsqlvTkUSkGAAzxLuQ4rwnandQMr8H0Wq7x5Cwa7Z3NDT/Q4EE3xRJOpoRgjyH
+					STdzW1akQ9dX2Et/8TiJe6SHuQ==
+				</ds:X509Certificate>
+			</ds:X509Data>
+		</ds:KeyInfo>
+	</ds:Signature>
+	<md:SPSSODescriptor AuthnRequestsSigned="true"
+		WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+		<md:Extensions>
+			<idpdisco:DiscoveryResponse
+				xmlns:idpdisco="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+				Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+				Location="http://brian.salenda.es:8080/grails-saml-demo/saml/login/alias/defaultAlias?disco=true" />
+		</md:Extensions>
+		<md:KeyDescriptor use="signing">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:X509Data>
+					<ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
+						LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
+						FTATBgNVBAoTDFJNNSBTb2Z0d2FyZTEMMAoGA1UECxMDUiZEMQ8wDQYDVQQDEwZhcG9sbG8wHhcN
+						MDgxMTI5MjIxNjA0WhcNMDkxMjI4MjIwMDAwWjCBhzEvMC0GCSqGSIb3DQEJARYgdmxhZGltaXIu
+						c2NoYWZlckBybTVzb2Z0d2FyZS5jb20xCzAJBgNVBAYTAkZJMREwDwYDVQQHEwhIZWxzaW5raTEV
+						MBMGA1UEChMMUk01IFNvZnR3YXJlMQwwCgYDVQQLEwNSJkQxDzANBgNVBAMTBmFwb2xsbzCBnzAN
+						BgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArsoEvHts4n4EwloxJNueekYYF8xjoV1AtXHAAW0c+Qtb
+						uEXR8wG1QzSlcasTua+iGsC+wK4T8l0IH9Y3+oVaDVbpzrWr2li9zhJB+htJYZ0t7m+3GEIeNlr1
+						qkUum/uNxUthklrhg2zCVW0b4NFDP/jI4rARsAkGXa7z/AgonrUCAwEAATANBgkqhkiG9w0BAQUF
+						AAOBgQArpq022JktjH3EHw0b4+CFrPzAXFuSd8WXWzoT6YZTgbcLR9K38383mMXoBjHdX3SYr0uF
+						njEwP6gqo8KyzXxsqlvTkUSkGAAzxLuQ4rwnandQMr8H0Wq7x5Cwa7Z3NDT/Q4EE3xRJOpoRgjyH
+						STdzW1akQ9dX2Et/8TiJe6SHuQ==
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</md:KeyDescriptor>
+		<md:KeyDescriptor use="encryption">
+			<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+				<ds:X509Data>
+					<ds:X509Certificate>MIICgjCCAesCBGpSpuowDQYJKoZIhvcNAQEFBQAwgYcxLzAtBgkqhkiG9w0BCQEWIHZsYWRpbWly
+						LnNjaGFmZXJAcm01c29mdHdhcmUuY29tMQswCQYDVQQGEwJGSTERMA8GA1UEBxMISGVsc2lua2kx
+						FTATBgNVBAoTDFJNNSBTb2Z0d2FyZTEMMAoGA1UECxMDUiZEMQ8wDQYDVQQDEwZhcG9sbG8wHhcN
+						MDgxMTI5MjIxNjA0WhcNMDkxMjI4MjIwMDAwWjCBhzEvMC0GCSqGSIb3DQEJARYgdmxhZGltaXIu
+						c2NoYWZlckBybTVzb2Z0d2FyZS5jb20xCzAJBgNVBAYTAkZJMREwDwYDVQQHEwhIZWxzaW5raTEV
+						MBMGA1UEChMMUk01IFNvZnR3YXJlMQwwCgYDVQQLEwNSJkQxDzANBgNVBAMTBmFwb2xsbzCBnzAN
+						BgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEArsoEvHts4n4EwloxJNueekYYF8xjoV1AtXHAAW0c+Qtb
+						uEXR8wG1QzSlcasTua+iGsC+wK4T8l0IH9Y3+oVaDVbpzrWr2li9zhJB+htJYZ0t7m+3GEIeNlr1
+						qkUum/uNxUthklrhg2zCVW0b4NFDP/jI4rARsAkGXa7z/AgonrUCAwEAATANBgkqhkiG9w0BAQUF
+						AAOBgQArpq022JktjH3EHw0b4+CFrPzAXFuSd8WXWzoT6YZTgbcLR9K38383mMXoBjHdX3SYr0uF
+						njEwP6gqo8KyzXxsqlvTkUSkGAAzxLuQ4rwnandQMr8H0Wq7x5Cwa7Z3NDT/Q4EE3xRJOpoRgjyH
+						STdzW1akQ9dX2Et/8TiJe6SHuQ==
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</md:KeyDescriptor>
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SingleLogout/alias/defaultAlias" />
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SingleLogout/alias/defaultAlias" />
+		<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SingleLogout/alias/defaultAlias" />
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+		</md:NameIDFormat>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+		</md:NameIDFormat>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+		</md:NameIDFormat>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+		</md:NameIDFormat>
+		<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName
+		</md:NameIDFormat>
+		<md:AssertionConsumerService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SSO/alias/defaultAlias"
+			index="0" isDefault="true" />
+		<md:AssertionConsumerService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SSO/alias/defaultAlias"
+			index="1" isDefault="false" />
+		<md:AssertionConsumerService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS"
+			Location="http://brian.salenda.es:8080/grails-saml-demo/saml/SSO/alias/defaultAlias"
+			index="2" isDefault="false" />
+	</md:SPSSODescriptor>
+</md:EntityDescriptor>

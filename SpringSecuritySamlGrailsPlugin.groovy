@@ -74,15 +74,11 @@ SAML 2.x support for the Spring Security Plugin
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
-//    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPSPRINGSECURITYSAML" ]
 
     // Online location of the plugin's browseable source code.
 //    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
 
-    def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
-    }
-	
 	def providers = []
 
     def doWithSpring = {
@@ -98,9 +94,14 @@ SAML 2.x support for the Spring Security Plugin
 		if (!conf.saml.active) {
 			return
 		}
+		
+		//Doing a println here just because spring-security-core does
 		println 'Configuring Spring Security SAML ...'
 
-		delegate.importBeans "classpath:security/springSecuritySamlBeans.xml"
+		//Due to Spring DSL limitations, need to import these beans as XML definitions
+		def beansFile = "classpath:security/springSecuritySamlBeans.xml"
+		log.debug "Importing beans from ${beansFile}..."
+		delegate.importBeans beansFile
 		
 		xmlns context:"http://www.springframework.org/schema/context"
 		context.'annotation-config'()
@@ -132,7 +133,7 @@ SAML 2.x support for the Spring Security Plugin
 		samlEntryPoint(SAMLEntryPoint) {
 			filterSuffix = conf.auth.loginFormUrl 						// '/saml/login'
 			if (idpSelectionPath) {
-				idpSelectionPath = idpSelectionPath 	// '/index.gsp'
+				idpSelectionPath = idpSelectionPath 					// '/index.gsp'
 			}
 			defaultProfileOptions = ref('webProfileOptions')
 		}
@@ -142,11 +143,12 @@ SAML 2.x support for the Spring Security Plugin
 		}
 		
 		metadataFilter(MetadataDisplayFilter) {
-			filterSuffix = conf.saml.metadata.url // '/saml/metadata'
+			filterSuffix = conf.saml.metadata.url 						// '/saml/metadata'
 		}
 		
 		metadataGenerator(MetadataGenerator)
 			
+		log.debug "Dinamically defining bean metadata providers... "
 		conf.saml.metadata.providers.each {k,v ->
 			def providerBeanName = "${k}HttpMetadataProvider"
 			"${providerBeanName}"(HTTPMetadataProvider, v, 5000) {
@@ -156,6 +158,8 @@ SAML 2.x support for the Spring Security Plugin
 		}
 		
 		metadata(CachingMetadataManager) { bean ->
+			// At this point, due to Spring DSL limitations, only one provider 
+			// can be defined so just picking the first one
 			bean.constructorArgs = [providers[0]]
 			providers = providers
 			defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
@@ -241,31 +245,23 @@ SAML 2.x support for the Spring Security Plugin
 		}
     }
 
-    def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
-    }
-
     def doWithApplicationContext = { applicationContext ->
+		/*
 		def metadata = applicationContext.getBean('metadata')
 		def providerBeans = []
 		providers.each {
 			providerBeans << applicationContext.getBean(it.beanName)
 		}
 		metadata.setProviders(providerBeans)
+		*/
     }
 
     def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
+        // TODO reload
     }
 
     def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
+        // TODO reload
     }
 
-    def onShutdown = { event ->
-        // TODO Implement code that is executed when the application shuts down (optional)
-    }
 }

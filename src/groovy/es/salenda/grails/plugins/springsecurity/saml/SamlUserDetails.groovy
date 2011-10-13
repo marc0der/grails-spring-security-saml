@@ -33,9 +33,7 @@ class SamlUserDetails extends GormUserDetailsService implements SAMLUserDetailsS
 
 	def sessionFactory
 
-	@Override
-	public Object loadUserBySAML(SAMLCredential credential)
-	throws UsernameNotFoundException {
+	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
 		def username, fullName, email, password, user
 

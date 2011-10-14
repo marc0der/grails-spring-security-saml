@@ -5,9 +5,12 @@
   <description>SAML 2.x support for the Spring Security Plugin
 </description>
   <documentation>http://grails.org/plugin/spring-security-saml</documentation>
-  <type>SpringSecuritySamlGrailsPlugin</type>
   <resources>
+    <resource>BuildConfig</resource>
+    <resource>Config</resource>
+    <resource>DataSource</resource>
     <resource>DefaultSamlSecurityConfig</resource>
+    <resource>UrlMappings</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.MetadataController</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.SamlSecurityService</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.SamlTagLib</resource>

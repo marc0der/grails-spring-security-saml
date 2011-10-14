@@ -1,6 +1,7 @@
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
@@ -22,6 +23,8 @@ import org.springframework.security.saml.processor.HTTPArtifactBinding
 import org.springframework.security.saml.processor.HTTPSOAP11Binding
 import org.springframework.security.saml.processor.HTTPPAOS11Binding
 import org.springframework.security.saml.processor.SAMLProcessorImpl
+import org.springframework.security.saml.metadata.ExtendedMetadata
+import org.springframework.security.saml.metadata.ExtendedMetadataDelegate
 import org.springframework.security.saml.metadata.MetadataDisplayFilter
 import org.springframework.security.saml.metadata.MetadataGenerator
 import org.springframework.security.saml.metadata.CachingMetadataManager
@@ -34,6 +37,7 @@ import es.salenda.grails.plugins.springsecurity.saml.SamlUserDetails
 import es.salenda.grails.plugins.springsecurity.saml.SamlTagLib
 import es.salenda.grails.plugins.springsecurity.saml.SamlSecurityService
 
+import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider
 import org.opensaml.xml.parse.BasicParserPool
 
@@ -87,7 +91,8 @@ SAML 2.x support for the Spring Security Plugin
 			return
 		}
 
-		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
+//		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
+		SpringSecurityUtils.loadSecondaryConfig 'SamlSecurityConfig'
 		// have to get again after overlaying DefaultOpenIdSecurityConfig
 		conf = SpringSecurityUtils.securityConfig
 
@@ -148,13 +153,24 @@ SAML 2.x support for the Spring Security Plugin
 		
 		metadataGenerator(MetadataGenerator)
 			
-		log.debug "Dinamically defining bean metadata providers... "
+		// TODO: Update to handle any type of meta data providers for default to file based instead http provider.
+		log.debug "Dynamically defining bean metadata providers... "
 		conf.saml.metadata.providers.each {k,v ->
-			def providerBeanName = "${k}HttpMetadataProvider"
-			"${providerBeanName}"(HTTPMetadataProvider, v, 5000) {
-				parserPool = ref('parserPool')
-			}
-			providers << ref(providerBeanName)
+				def providerBeanName = "extendedMetadataDelegate"
+				
+				println "Registering metadata key: ${k} and value: $v"
+				
+				"${providerBeanName}"(ExtendedMetadataDelegate) { extMetaDataDelegateBean ->
+						def resource = new ClassPathResource(v)
+						filesystemMetadataProvider(FilesystemMetadataProvider) { bean ->
+							bean.constructorArgs = [new File(v)]
+							parserPool = ref('parserPool')
+						}
+
+						extMetaDataDelegateBean.constructorArgs = [ref('filesystemMetadataProvider'), new ExtendedMetadata()]
+				}
+
+				providers << ref(providerBeanName)
 		}
 		
 		metadata(CachingMetadataManager) { bean ->
@@ -162,7 +178,7 @@ SAML 2.x support for the Spring Security Plugin
 			// can be defined so just picking the first one
 			bean.constructorArgs = [providers[0]]
 			providers = providers
-			defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
+			// defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
 		}
 		
 		userDetailsService(SamlUserDetails) {
@@ -263,5 +279,4 @@ SAML 2.x support for the Spring Security Plugin
     def onConfigChange = { event ->
         // TODO reload
     }
-
 }

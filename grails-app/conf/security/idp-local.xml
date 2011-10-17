@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="localhost:default:entityId" cacheDuration="PT1440M" ID="XpK4KzotwbSFUKx.-NtBzfGDWti">
+  <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+            <ds:X509Certificate>
+MIICRTCCAa6gAwIBAgIGAR0gYMbwMA0GCSqGSIb3DQEBBQUAMGYxCzAJBgNVBAYTAlVTMQswCQYD
+VQQIEwJDTzEPMA0GA1UEBxMGRGVudmVyMQwwCgYDVQQKEwNEZXYxDTALBgNVBAsTBFBpbmcxHDAa
+BgNVBAMTE0NvbmZpZyBTaWduaW5nIENlcnQwHhcNMDgxMDIxMTcwODEyWhcNMTMxMDIwMTcwODEy
+WjBmMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ08xDzANBgNVBAcTBkRlbnZlcjEMMAoGA1UEChMD
+RGV2MQ0wCwYDVQQLEwRQaW5nMRwwGgYDVQQDExNDb25maWcgU2lnbmluZyBDZXJ0MIGfMA0GCSqG
+SIb3DQEBAQUAA4GNADCBiQKBgQDQeOdW6I2hyXCQn0X/+8/BzLfRfdy1kN54lmVauYEpaPHQo7by
+gPPRPUTDC3LgJGfk4NWkPaM+EOeLzuVw9rbD3gjfsex6hUElkvUzPqXqNN3sq/2hm+FJup+GakE9
+WCoEP5sGvlJshH00a4MSzjGTBBqqjsXaWDZ7Sy9UAGw5BQIDAQABMA0GCSqGSIb3DQEBBQUAA4GB
+AKSNMImzVs7L+tfortt7RBFMzc/JLE8qnulY32FrWA3ZLrD+08EBeIp1iwdJ8AGpii3SFV3oV3xu
+92Qy2WqsBwj1erYdKW5mrfAbThkwL5N7jRsjJyXnIcx3IBvRD+O+LIDHck0cSgmN14ghleeslx0Q
+15kyBdoxbv6pR0k4xOaF
+            </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Location="https://localhost:9031/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+    <md:SingleLogoutService Location="https://localhost:9031/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:entity</md:NameIDFormat>
+    <md:SingleSignOnService Location="https://localhost:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:SingleSignOnService Location="https://localhost:9031/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+  </md:IDPSSODescriptor>
+  <md:ContactPerson contactType="administrative"/>
+</md:EntityDescriptor>

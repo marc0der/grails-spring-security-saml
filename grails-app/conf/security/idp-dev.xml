@@ -1,0 +1,35 @@
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="BurberryDEV" cacheDuration="PT1440M" ID="lPV.0yCK60yB7iz0X5D_FOG8lr_">
+  <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>
+MIICOTCCAaKgAwIBAgIGATJtgDv7MA0GCSqGSIb3DQEBBQUAMGAxCzAJBgNVBAYTAkdCMQ8wDQYD
+VQQIEwZMb25kb24xDzANBgNVBAcTBkxvbmRvbjERMA8GA1UEChMIQnVyYmVycnkxCzAJBgNVBAsT
+AklUMQ8wDQYDVQQDEwZQSU42LjUwHhcNMTEwOTE1MTQzMTUzWhcNMTIwOTE0MTQzMTUzWjBgMQsw
+CQYDVQQGEwJHQjEPMA0GA1UECBMGTG9uZG9uMQ8wDQYDVQQHEwZMb25kb24xETAPBgNVBAoTCEJ1
+cmJlcnJ5MQswCQYDVQQLEwJJVDEPMA0GA1UEAxMGUElONi41MIGfMA0GCSqGSIb3DQEBAQUAA4GN
+ADCBiQKBgQCXWNz7gAevkpfpZsuV9aTnE+AbD19ZSG4yEdJ7qLH6TaJiiJdaktdjVQOInO8TrC7w
+twgFZ4bHTjoxwbeBmnZG8JiiQJjcZKgDO/AM3hE9U2Laa7aOLyAXNvkzay56sjKMNGrqhawmy77Q
+IH4NWqPpDM9qEBUwInkBC39x8BI+jQIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAJKjVhqAWjY0guud
+HHfETL2f0s/QWyhD0pXMBlX/7EFu1rnKwCWo4WPK9Y29cAVdJbsTNviqi4XNHpafZy/Z5obEULE9
+B6A9du/H5QINSow24CFwO6kx8kj8HJl6OP/LU2Y4uR3M72HkNsV6nIe3VOTFM1d82Wr2CIeffwk+
+Zx5/
+        </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Location="https://sso.dev.burberry.com/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+    <md:SingleLogoutService Location="https://sso.dev.burberry.com/idp/SLO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:entity</md:NameIDFormat>
+    <md:SingleSignOnService Location="https://sso.dev.burberry.com/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+    <md:SingleSignOnService Location="https://sso.dev.burberry.com/idp/SSO.saml2" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
+  </md:IDPSSODescriptor>
+  <md:ContactPerson contactType="administrative">
+    <md:Company>Burberry Ltd</md:Company>
+    <md:GivenName>Mark</md:GivenName>
+    <md:SurName>Thomas</md:SurName>
+    <md:EmailAddress>mark.thomas@burberry.com</md:EmailAddress>
+    <md:TelephoneNumber>+44 7957 547 983</md:TelephoneNumber>
+  </md:ContactPerson>
+</md:EntityDescriptor>

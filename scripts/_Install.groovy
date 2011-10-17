@@ -1,10 +1,19 @@
-//
-// This script is executed by Grails after plugin was installed to project.
-// This script is a Gant script so you can use all special variables provided
-// by Gant (such as 'baseDir' which points on project base dir). You can
-// use 'ant' to access a global instance of AntBuilder
-//
-// For example you can create directory under project tree:
-//
-//    ant.mkdir(dir:"${basedir}/grails-app/jobs")
-//
+
+ant.mkdir(dir:"${basedir}/grails-app/conf/security")
+ant.copy(todir:"${basedir}/grails-app/conf/security") {
+	fileset(dir:"${pluginBasedir}/grails-app/conf/security") {
+		include(name:"*.*")
+	}
+}
+
+ant.copy(file:"${pluginBasedir}/grails-app/conf/SamlSecurityConfig.groovy",
+         todir:"${basedir}/grails-app/conf")	
+
+println '''
+*******************************************************
+* You've installed the Spring Security Saml plugin.   *
+*                                                     *
+* Base configuration files and initial keystore have  *
+* been create under the conf folder                   *
+*******************************************************
+'''

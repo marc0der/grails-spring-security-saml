@@ -1,5 +1,12 @@
-//
-// This script is executed by Grails when the plugin is uninstalled from project.
-// Use this script if you intend to do any additional clean-up on uninstall, but
-// beware of messing up SVN directories!
-//
+ant.delete(dir:"${basedir}/grails-app/conf/security")
+ant.delete(file:"${basedir}/grails-app/conf/SamlSecurityConfig.groovy")
+
+println '''
+*******************************************************
+* You've sucessfully uninstalled the                  *
+* Spring Security Saml plugin.                        *
+*                                                     *
+* Saml configuration files have been removed from     *
+* your project.                                       *
+*******************************************************
+'''

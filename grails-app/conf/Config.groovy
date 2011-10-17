@@ -22,5 +22,20 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
+
+grails {
+	plugins {
+		springsecurity {
+			userLookup {
+				userDomainClassName = 'test.TestSamlUser'
+				authorityJoinClassName = 'test.TestUserRole'
+			}
+			authority {
+				className = 'test.TestRole'
+			}
+		}
+	}
+}
+
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"

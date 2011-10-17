@@ -3,3 +3,4 @@
 .settings
 .project
 web-app/WEB-INF/classes/
+stacktrace.log

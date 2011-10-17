@@ -21,7 +21,7 @@ security {
 		metadata{
 			url = '/saml/metadata'
 			providers = [
-				'ssoCircle':'http://idp.ssocircle.com/idp-meta.xml'
+				'ssoCircle':'grails-app/conf/security/idp-ssocircle.xml'
 			]
 			defaultIdp = 'ssoCircle'
 		}

@@ -10,8 +10,12 @@
     <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>DefaultSamlSecurityConfig</resource>
+    <resource>SamlSecurityConfig</resource>
     <resource>UrlMappings</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.MetadataController</resource>
+    <resource>test.TestRole</resource>
+    <resource>test.TestSamlUser</resource>
+    <resource>test.TestUserRole</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.SamlSecurityService</resource>
     <resource>es.salenda.grails.plugins.springsecurity.saml.SamlTagLib</resource>
   </resources>

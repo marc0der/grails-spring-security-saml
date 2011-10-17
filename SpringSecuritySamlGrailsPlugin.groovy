@@ -1,3 +1,4 @@
+import org.codehaus.groovy.grails.compiler.GrailsClassLoader;
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
 
@@ -33,7 +34,7 @@ import org.springframework.security.saml.key.JKSKeyManager
 import org.springframework.security.saml.util.VelocityFactory
 import org.springframework.security.saml.context.SAMLContextProviderImpl
 
-import es.salenda.grails.plugins.springsecurity.saml.SamlUserDetails
+import es.salenda.grails.plugins.springsecurity.saml.SpringSamlUserDetailsService
 import es.salenda.grails.plugins.springsecurity.saml.SamlTagLib
 import es.salenda.grails.plugins.springsecurity.saml.SamlSecurityService
 
@@ -90,9 +91,17 @@ SAML 2.x support for the Spring Security Plugin
 		if (!conf || !conf.active) {
 			return
 		}
+		
+		// Allow users to override saml configuration from default
+		def samlConfigFile = 'SamlSecurityConfig'
+		def resFile = new ClassPathResource("${samlConfigFile}.class", SpringSecuritySamlGrailsPlugin.class.getClassLoader())
 
-//		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
-		SpringSecurityUtils.loadSecondaryConfig 'SamlSecurityConfig'
+		if (resFile.exists()) {
+			SpringSecurityUtils.loadSecondaryConfig samlConfigFile
+		} else {
+			SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
+		}
+		
 		// have to get again after overlaying DefaultOpenIdSecurityConfig
 		conf = SpringSecurityUtils.securityConfig
 
@@ -163,7 +172,7 @@ SAML 2.x support for the Spring Security Plugin
 				"${providerBeanName}"(ExtendedMetadataDelegate) { extMetaDataDelegateBean ->
 						def resource = new ClassPathResource(v)
 						filesystemMetadataProvider(FilesystemMetadataProvider) { bean ->
-							bean.constructorArgs = [new File(v)]
+							bean.constructorArgs = [resource.getFile()]
 							parserPool = ref('parserPool')
 						}
 
@@ -181,7 +190,7 @@ SAML 2.x support for the Spring Security Plugin
 			// defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
 		}
 		
-		userDetailsService(SamlUserDetails) {
+		userDetailsService(SpringSamlUserDetailsService) {
 			grailsApplication = ref('grailsApplication')
 			sessionFactory = ref('sessionFactory')
 		}

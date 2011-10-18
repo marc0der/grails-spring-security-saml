@@ -4,3 +4,8 @@
 .project
 web-app/WEB-INF/classes/
 stacktrace.log
+plugin.xml
+grails-spring-security-saml-*.zip
+grails-spring-security-saml-*.zip.*
+spring-security-saml-*-plugin.xml
+spring-security-saml-*.pom

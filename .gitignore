@@ -1,4 +1,4 @@
-/target
+/target*
 .classpath
 .settings
 .project
@@ -9,3 +9,4 @@ grails-spring-security-saml-*.zip
 grails-spring-security-saml-*.zip.*
 spring-security-saml-*-plugin.xml
 spring-security-saml-*.pom
+.DS_Store

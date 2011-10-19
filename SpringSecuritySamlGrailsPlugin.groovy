@@ -8,7 +8,6 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
 import org.springframework.security.saml.SAMLBootstrap
 import org.springframework.security.saml.SAMLEntryPoint
-import org.springframework.security.saml.SAMLAuthenticationProvider
 import org.springframework.security.saml.SAMLProcessingFilter
 import org.springframework.security.saml.SAMLLogoutFilter
 import org.springframework.security.saml.SAMLLogoutProcessingFilter

@@ -18,9 +18,6 @@ grails.project.dependency.resolution = {
 	}
 
     dependencies {
-		compile ('org.springframework.security.extensions:spring-security-saml2-core:1.0.0-RC1-SNAPSHOT') {
-			transitive = false
-		}
 		compile ('org.opensaml:opensaml:2.4.1') {
 			transitive = false
 		}
@@ -48,9 +45,6 @@ grails.project.dependency.resolution = {
 		compile ('ca.juliusdavies:not-yet-commons-ssl:0.3.9') {
 			transitive = false 
 		}
-		/*compile('xerces:xercesImpl:2.8.1') {
-			transitive = false
-		}*/
     }
 
     plugins {

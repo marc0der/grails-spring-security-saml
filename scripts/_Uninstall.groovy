@@ -1,11 +1,13 @@
-ant.delete(dir:"${basedir}/grails-app/conf/security")
+includeTargets << new File("$springSecuritySamlPluginDir/scripts/_SamlCommon.groovy")
 
-println '''
+printMessage '''
 *******************************************************
 * You've sucessfully uninstalled the                  *
 * Spring Security Saml plugin.                        *
 *                                                     *
-* Saml configuration files have been removed from     *
-* your project.                                       *
+* Saml configuration files remain in                  *
+* grails-app/conf/security and configuration params   *
+* in grails-app/conf/Config.groovy. Remove these      *
+* manually if required.                               *
 *******************************************************
 '''

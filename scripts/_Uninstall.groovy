@@ -1,5 +1,4 @@
 ant.delete(dir:"${basedir}/grails-app/conf/security")
-ant.delete(file:"${basedir}/grails-app/conf/SamlSecurityConfig.groovy")
 
 println '''
 *******************************************************

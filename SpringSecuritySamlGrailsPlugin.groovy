@@ -63,7 +63,6 @@ class SpringSecuritySamlGrailsPlugin {
     def description = '''\
 SAML 2.x support for the Spring Security Plugin
 '''
-
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/spring-security-saml"
 
@@ -89,27 +88,10 @@ SAML 2.x support for the Spring Security Plugin
     def doWithSpring = {
 		def conf = SpringSecurityUtils.securityConfig
 		if (!conf || !conf.active) {
+			println '\n\nSpring Security SAML is disabled, not loading\n\n'
 			return
 		}
 		
-		// Allow users to override saml configuration from default
-		def samlConfigFile = 'SamlSecurityConfig'
-		def resFile = new ClassPathResource("${samlConfigFile}.class", SpringSecuritySamlGrailsPlugin.class.getClassLoader())
-
-		if (resFile.exists()) {
-			SpringSecurityUtils.loadSecondaryConfig samlConfigFile
-		} else {
-			SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
-		}
-		
-		// have to get again after overlaying DefaultOpenIdSecurityConfig
-		conf = SpringSecurityUtils.securityConfig
-
-		if (!conf.saml.active) {
-			return
-		}
-		
-		//Doing a println here just because spring-security-core does
 		println 'Configuring Spring Security SAML ...'
 
 		//Due to Spring DSL limitations, need to import these beans as XML definitions

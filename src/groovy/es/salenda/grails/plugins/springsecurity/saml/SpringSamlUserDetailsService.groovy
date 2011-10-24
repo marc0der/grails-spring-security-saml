@@ -94,8 +94,6 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		log.debug "User is a member of saml groups: ${samlGroups}"
 		
 		Class<?> Role = grailsApplication.getDomainClass(securityConfig.authority.className).clazz
-		
-		def roles = []
 		def groupToRoleMapping = SpringSecurityUtils.securityConfig.saml.userGroupToRoleMapping
 		def authorityFieldName = securityConfig.authority.nameField
 		samlGroups.each { groupName ->
@@ -122,18 +120,19 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		def userGroups = []
 		
 		def groupAttribute = SpringSecurityUtils.securityConfig.saml.userGroupAttribute
-		
-		credential.getAttributeByName(groupAttribute).each { attribute ->
-			attribute.getAttributeValues().each { attributeValue ->
-				log.debug "Processing group attribute value: ${attributeValue.value}"
+		if (groupAttribute) {
+			credential.getAttributeByName(groupAttribute).each { attribute ->
+				attribute.getAttributeValues().each { attributeValue ->
+					log.debug "Processing group attribute value: ${attributeValue.value}"
+			
+					def groupString = attributeValue.value
+			
+					groupString.tokenize(',').each { token ->
+						def keyValuePair = token.tokenize('=')
 				
-				def groupString = attributeValue.value
-				
-				groupString.tokenize(',').each { token ->
-					def keyValuePair = token.tokenize('=')
-					
-					if (keyValuePair.first() == 'CN') {
-						userGroups << keyValuePair.last()
+						if (keyValuePair.first() == 'CN') {
+							userGroups << keyValuePair.last()
+						}
 					}
 				}
 			}

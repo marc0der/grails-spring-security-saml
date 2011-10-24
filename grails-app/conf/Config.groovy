@@ -57,11 +57,12 @@ grails.plugins.springsecurity.saml.userGroupAttribute = "memberOf"
 grails.plugins.springsecurity.saml.userGroupToRoleMapping = ['GRG.APP.DigitalCatalogue':"ROLE_USER"]
 grails.plugins.springsecurity.saml.metadata.url = '/saml/metadata'
 grails.plugins.springsecurity.saml.metadata.providers = ['ping':'security/idp-local.xml']
-grails.plugins.springsecurity.saml.metadata.sp.file = 'security/sp.xml'
 grails.plugins.springsecurity.saml.keyManager.storeFile = 'classpath:security/keystore.jks'
 grails.plugins.springsecurity.saml.keyManager.storePass = 'nalle123'
 grails.plugins.springsecurity.saml.keyManager.passwords = ['ping':'ping123']
 grails.plugins.springsecurity.saml.keyManager.defaultKey = 'ping'
+
+grails.plugins.springsecurity.saml.metadata.sp.file = 'security/sp.xml'
 grails.plugins.springsecurity.saml.metadata.sp.spMetadataDefaults = [
 								'local':true, 'alias':'test','securityProfile':'metaiop','signingKey':'ping',
 								'encryptionKey':'ping', 'tlsKey':'ping','requireArtifactResolveSigned':false,

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <md:EntityDescriptor entityID="test" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+	<md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:Extensions>
+      <idpdisco:DiscoveryResponse xmlns:idpdisco="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" Location="http://localhost:8080/spring-security-saml/login/auth/alias/localhost?disco=true"/>
+    </md:Extensions>
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>
+MIIC9jCCArSgAwIBAgIETo67pDALBgcqhkjOOAQDBQAwXjELMAkGA1UEBhMCVUsxEDAOBgNVBAgT
+B1Vua25vd24xDzANBgNVBAcTBmxvbmRvbjENMAsGA1UEChMEYnVyYjENMAsGA1UECxMEYnVyYjEO
+MAwGA1UEAxMFZmVyb3owHhcNMTExMDA3MDg0MzE2WhcNMTIwMTA1MDg0MzE2WjBeMQswCQYDVQQG
+EwJVSzEQMA4GA1UECBMHVW5rbm93bjEPMA0GA1UEBxMGbG9uZG9uMQ0wCwYDVQQKEwRidXJiMQ0w
+CwYDVQQLEwRidXJiMQ4wDAYDVQQDEwVmZXJvejCCAbgwggEsBgcqhkjOOAQBMIIBHwKBgQD9f1OB
+HXUSKVLfSpwu7OTn9hG3UjzvRADDHj+AtlEmaUVdQCJR+1k9jVj6v8X1ujD2y5tVbNeBO4AdNG/y
+ZmC3a5lQpaSfn+gEexAiwk+7qdf+t8Yb+DtX58aophUPBPuD9tPFHsMCNVQTWhaRMvZ1864rYdcq
+7/IiAxmd0UgBxwIVAJdgUI8VIwvMspK5gqLrhAvwWBz1AoGBAPfhoIXWmz3ey7yrXDa4V7l5lK+7
++jrqgvlXTAs9B4JnUVlXjrrUWU/mcQcQgYC0SRZxI+hMKBYTt88JMozIpuE8FnqLVHyNKOCjrh4r
+s6Z1kW6jfwv6ITVi8ftiegEkO8yk8b6oUZCJqIPf4VrlnwaSi2ZegHtVJWQBTDv+z0kqA4GFAAKB
+gQDKBDz1DFPPmmWp9n1FskJOev7CnnVFsKji1NLUDdifvS+uW+cnvnDfD3yPdxzUeknCrPTBRp+B
+IvYUvLQ57LMIuLgKQ12RujGl0Oz9JbFMAHuBV2I/7ZykzGQPysSEqKCqG+kDc8VZ4AfIf/S8YnQk
+xqdWQ5jLTIzXvcWd0WEYbDALBgcqhkjOOAQDBQADLwAwLAIUGP/oZpi79ZM1793XzZvnmrnmz5gC
+FBm4bDN8h/0hAa83jaD8joLr098I
+			</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/spring-security-saml/saml/SingleLogout/alias/localhost"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8080/spring-security-saml/saml/SingleLogout/alias/localhost"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://localhost:8080/spring-security-saml/saml/SingleLogout/alias/localhost"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/spring-security-saml/saml/SSO/alias/localhost" index="0" isDefault="true"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="http://localhost:8080/spring-security-saml/saml/SSO/alias/localhost" index="1" isDefault="false"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS" Location="http://localhost:8080/spring-security-saml/saml/SSO/alias/localhost" index="2" isDefault="false"/>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>

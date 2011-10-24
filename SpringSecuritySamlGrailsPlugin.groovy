@@ -146,11 +146,10 @@ SAML 2.x support for the Spring Security Plugin
 			
 		// TODO: Update to handle any type of meta data providers for default to file based instead http provider.
 		log.debug "Dynamically defining bean metadata providers... "
+		def providerBeanName = "extendedMetadataDelegate"
 		conf.saml.metadata.providers.each {k,v ->
-				def providerBeanName = "extendedMetadataDelegate"
 				
 				println "Registering metadata key: ${k} and value: $v"
-				
 				"${providerBeanName}"(ExtendedMetadataDelegate) { extMetaDataDelegateBean ->
 						def resource = new ClassPathResource(v)
 						filesystemMetadataProvider(FilesystemMetadataProvider) { bean ->
@@ -164,11 +163,46 @@ SAML 2.x support for the Spring Security Plugin
 				providers << ref(providerBeanName)
 		}
 		
-		metadata(CachingMetadataManager) { bean ->
+		// you can only define a single service provider configuration
+		def spFile = conf.saml.metadata.sp.file
+		def defaultSpConfig = conf.saml.metadata.sp.spMetadataDefaults
+		if (spFile) {
+			
+			def spResource = new ClassPathResource(spFile)
+			spMetadata(ExtendedMetadataDelegate) { spMetadataBean ->
+				spMetadataProvider(FilesystemMetadataProvider) { spMetadataProviderBean ->
+					spMetadataProviderBean.constructorArgs = [spResource.getFile()]
+					parserPool = ref('parserPool')
+				}
+				
+				spMetadataDefaults(ExtendedMetadata) { extMetadata ->
+					local = defaultSpConfig."local"
+					alias = defaultSpConfig."alias"
+					securityProfile = defaultSpConfig."securityProfile"
+					signingKey = defaultSpConfig."signingKey"
+					encryptionKey = defaultSpConfig."encryptionKey"
+					tlsKey = defaultSpConfig."tlsKey"
+					requireArtifactResolveSigned = defaultSpConfig."requireArtifactResolveSigned"
+					requireLogoutRequestSigned = defaultSpConfig."requireLogoutRequestSigned"
+					requireLogoutResponseSigned = defaultSpConfig."requireLogoutResponseSigned"
+				}
+				
+				spMetadataBean.constructorArgs = [ref('spMetadataProvider'), ref('spMetadataDefaults')]
+			}
+			
+			providers << ref('spMetadata')
+		}
+		
+		metadata(CachingMetadataManager) { metadataBean ->
 			// At this point, due to Spring DSL limitations, only one provider 
 			// can be defined so just picking the first one
-			bean.constructorArgs = [providers[0]]
+			metadataBean.constructorArgs = [providers.first()]
 			providers = providers
+			
+			if (defaultSpConfig?."alias") {
+				hostedSPName = defaultSpConfig?."alias"
+			}
+
 			// defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
 		}
 		

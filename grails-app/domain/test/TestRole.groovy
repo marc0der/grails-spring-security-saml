@@ -12,26 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-security {
-	saml {
-		active = true
-		entryPoint {
-			//idpSelectionPath = '/saml/idpSelection.gsp'
-		}
-		metadata{
-			url = '/saml/metadata'
-			providers = [
-				'ssoCircle':'http://idp.ssocircle.com/idp-meta.xml'
-			]
-			defaultIdp = 'ssoCircle'
-		}
-		keyManager {
-			storeFile = "classpath:security/samlKeystore.jks"
-			storePass = "nalle123"
-			passwords = ['apollo':'nalle123']
-			defaultKey = 'apollo'
-		}
-		afterLoginUrl = '/'
-		afterLogoutUrl = '/'
+package test
+
+class TestRole {
+
+	String authority
+
+	static constraints = {
+		authority blank: false, unique: true
 	}
 }

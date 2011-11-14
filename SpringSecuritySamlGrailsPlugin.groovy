@@ -1,12 +1,13 @@
+import org.codehaus.groovy.grails.compiler.GrailsClassLoader;
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
 import org.springframework.security.saml.SAMLBootstrap
 import org.springframework.security.saml.SAMLEntryPoint
-import org.springframework.security.saml.SAMLAuthenticationProvider
 import org.springframework.security.saml.SAMLProcessingFilter
 import org.springframework.security.saml.SAMLLogoutFilter
 import org.springframework.security.saml.SAMLLogoutProcessingFilter
@@ -22,6 +23,8 @@ import org.springframework.security.saml.processor.HTTPArtifactBinding
 import org.springframework.security.saml.processor.HTTPSOAP11Binding
 import org.springframework.security.saml.processor.HTTPPAOS11Binding
 import org.springframework.security.saml.processor.SAMLProcessorImpl
+import org.springframework.security.saml.metadata.ExtendedMetadata
+import org.springframework.security.saml.metadata.ExtendedMetadataDelegate
 import org.springframework.security.saml.metadata.MetadataDisplayFilter
 import org.springframework.security.saml.metadata.MetadataGenerator
 import org.springframework.security.saml.metadata.CachingMetadataManager
@@ -30,10 +33,12 @@ import org.springframework.security.saml.key.JKSKeyManager
 import org.springframework.security.saml.util.VelocityFactory
 import org.springframework.security.saml.context.SAMLContextProviderImpl
 
-import es.salenda.grails.plugins.springsecurity.saml.SamlUserDetails
+import es.salenda.grails.plugins.springsecurity.saml.SpringSamlUserDetailsService
+import es.salenda.grails.plugins.springsecurity.saml.GrailsSAMLAuthenticationProvider
 import es.salenda.grails.plugins.springsecurity.saml.SamlTagLib
 import es.salenda.grails.plugins.springsecurity.saml.SamlSecurityService
 
+import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider
 import org.opensaml.xml.parse.BasicParserPool
 
@@ -41,7 +46,7 @@ import org.apache.commons.httpclient.HttpClient
 
 class SpringSecuritySamlGrailsPlugin {
     // the plugin version
-    def version = "1.0.0.M1"
+    def version = "1.0.0.M4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3 > *"
     // the other plugins this plugin depends on
@@ -58,7 +63,6 @@ class SpringSecuritySamlGrailsPlugin {
     def description = '''\
 SAML 2.x support for the Spring Security Plugin
 '''
-
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/spring-security-saml"
 
@@ -71,31 +75,23 @@ SAML 2.x support for the Spring Security Plugin
     def organization = [ name: "Salenda", url: "http://www.salenda.es" ]
 
     // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+    def developers = [ [ name: "Feroz Panwaskar", email: "feroz.panwaskar@gmail.com" ], [ name: "Marco Vermeulen", email: "vermeulen.mp@gmail.com" ]]
 
     // Location of the plugin's issue tracker.
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPSPRINGSECURITYSAML" ]
 
     // Online location of the plugin's browseable source code.
-//    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
+    def scm = [ url: "https://github.com/marcoVermeulen/grails-spring-security-saml" ]
 
 	def providers = []
 
     def doWithSpring = {
 		def conf = SpringSecurityUtils.securityConfig
-		if (!conf || !conf.active) {
-			return
-		}
-
-		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
-		// have to get again after overlaying DefaultOpenIdSecurityConfig
-		conf = SpringSecurityUtils.securityConfig
-
-		if (!conf.saml.active) {
+		if (!conf || !conf.active || !conf.saml.active) {
+			println '\n\nSpring Security SAML is disabled, not loading\n\n'
 			return
 		}
 		
-		//Doing a println here just because spring-security-core does
 		println 'Configuring Spring Security SAML ...'
 
 		//Due to Spring DSL limitations, need to import these beans as XML definitions
@@ -148,29 +144,74 @@ SAML 2.x support for the Spring Security Plugin
 		
 		metadataGenerator(MetadataGenerator)
 			
-		log.debug "Dinamically defining bean metadata providers... "
+		// TODO: Update to handle any type of meta data providers for default to file based instead http provider.
+		log.debug "Dynamically defining bean metadata providers... "
+		def providerBeanName = "extendedMetadataDelegate"
 		conf.saml.metadata.providers.each {k,v ->
-			def providerBeanName = "${k}HttpMetadataProvider"
-			"${providerBeanName}"(HTTPMetadataProvider, v, 5000) {
-				parserPool = ref('parserPool')
-			}
-			providers << ref(providerBeanName)
+				
+				println "Registering metadata key: ${k} and value: $v"
+				"${providerBeanName}"(ExtendedMetadataDelegate) { extMetaDataDelegateBean ->
+						def resource = new ClassPathResource(v)
+						filesystemMetadataProvider(FilesystemMetadataProvider) { bean ->
+							bean.constructorArgs = [resource.getFile()]
+							parserPool = ref('parserPool')
+						}
+
+						extMetaDataDelegateBean.constructorArgs = [ref('filesystemMetadataProvider'), new ExtendedMetadata()]
+				}
+
+				providers << ref(providerBeanName)
 		}
 		
-		metadata(CachingMetadataManager) { bean ->
+		// you can only define a single service provider configuration
+		def spFile = conf.saml.metadata.sp.file
+		def defaultSpConfig = conf.saml.metadata.sp.spMetadataDefaults
+		if (spFile) {
+			
+			def spResource = new ClassPathResource(spFile)
+			spMetadata(ExtendedMetadataDelegate) { spMetadataBean ->
+				spMetadataProvider(FilesystemMetadataProvider) { spMetadataProviderBean ->
+					spMetadataProviderBean.constructorArgs = [spResource.getFile()]
+					parserPool = ref('parserPool')
+				}
+				
+				spMetadataDefaults(ExtendedMetadata) { extMetadata ->
+					local = defaultSpConfig."local"
+					alias = defaultSpConfig."alias"
+					securityProfile = defaultSpConfig."securityProfile"
+					signingKey = defaultSpConfig."signingKey"
+					encryptionKey = defaultSpConfig."encryptionKey"
+					tlsKey = defaultSpConfig."tlsKey"
+					requireArtifactResolveSigned = defaultSpConfig."requireArtifactResolveSigned"
+					requireLogoutRequestSigned = defaultSpConfig."requireLogoutRequestSigned"
+					requireLogoutResponseSigned = defaultSpConfig."requireLogoutResponseSigned"
+				}
+				
+				spMetadataBean.constructorArgs = [ref('spMetadataProvider'), ref('spMetadataDefaults')]
+			}
+			
+			providers << ref('spMetadata')
+		}
+		
+		metadata(CachingMetadataManager) { metadataBean ->
 			// At this point, due to Spring DSL limitations, only one provider 
 			// can be defined so just picking the first one
-			bean.constructorArgs = [providers[0]]
+			metadataBean.constructorArgs = [providers.first()]
 			providers = providers
-			defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
+			
+			if (defaultSpConfig?."alias") {
+				hostedSPName = defaultSpConfig?."alias"
+			}
+
+			// defaultIDP = conf.saml.metadata.providers[conf.saml.metadata.defaultIdp]
 		}
 		
-		userDetailsService(SamlUserDetails) {
+		userDetailsService(SpringSamlUserDetailsService) {
 			grailsApplication = ref('grailsApplication')
 			sessionFactory = ref('sessionFactory')
 		}
 		
-		samlAuthenticationProvider(SAMLAuthenticationProvider) {
+		samlAuthenticationProvider(GrailsSAMLAuthenticationProvider) {
 			userDetails = ref('userDetailsService')
 		}
 		
@@ -263,5 +304,4 @@ SAML 2.x support for the Spring Security Plugin
     def onConfigChange = { event ->
         // TODO reload
     }
-
 }

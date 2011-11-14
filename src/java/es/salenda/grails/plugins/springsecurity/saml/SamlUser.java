@@ -15,7 +15,6 @@
 package es.salenda.grails.plugins.springsecurity.saml;
 
 import java.util.Collection;
-
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -24,7 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
  * @author alvaro.sanchez
  *
  */
-public class SamlUser extends GrailsUser{
+public class SamlUser extends GrailsUser {
 	
 	private static final long serialVersionUID = -4051398912660521656L;
 	
@@ -44,7 +43,6 @@ public class SamlUser extends GrailsUser{
 		this.fullName = fullName;
 	}
 
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(this.fullName);
 		String result = sb.append(" (").append(getUsername()).append(")").toString();

@@ -6,6 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy
 import org.springframework.security.saml.SAMLBootstrap
 import org.springframework.security.saml.SAMLEntryPoint
 import org.springframework.security.saml.SAMLProcessingFilter
@@ -220,7 +221,10 @@ SAML 2.x support for the Spring Security Plugin
 		samlProcessingFilter(SAMLProcessingFilter) {
 			authenticationManager = ref('authenticationManager')
 			authenticationSuccessHandler = ref('successRedirectHandler')
+			sessionAuthenticationStrategy = ref('sessionFixationProtectionStrategy')
 		}
+
+		sessionFixationProtectionStrategy(SessionFixationProtectionStrategy)
 		
 		logoutHandler(SecurityContextLogoutHandler) {
 			invalidateHttpSession = false

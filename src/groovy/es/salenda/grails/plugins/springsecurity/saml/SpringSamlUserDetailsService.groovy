@@ -63,7 +63,9 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	protected String getSamlUsername(securityConfig, credential) {
 		def userMappings = securityConfig.userAttributeMappings
 		if (userMappings?.username) {
-			return credential.getAttributeByName(userMappings.username)?.attributeValues?.value
+			def attribute = credential.getAttributeByName(userMappings.username)
+			def value = attribute?.attributeValues?.value
+			return value?.first()
 			
 		} else {
 			// if no mapping provided for username attribute then assume it is the returned subject in the assertion

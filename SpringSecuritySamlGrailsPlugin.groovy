@@ -227,7 +227,7 @@ SAML 2.x support for the Spring Security Plugin
 		sessionFixationProtectionStrategy(SessionFixationProtectionStrategy)
 		
 		logoutHandler(SecurityContextLogoutHandler) {
-			invalidateHttpSession = false
+			invalidateHttpSession = true
 		}
 		
 		samlLogoutFilter(SAMLLogoutFilter, 

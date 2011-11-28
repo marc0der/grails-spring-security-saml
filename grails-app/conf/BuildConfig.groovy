@@ -18,6 +18,7 @@ grails.project.dependency.resolution = {
 	}
 
     dependencies {
+		build "org.apache.ivy:ivy:2.2.0"
 		compile ('org.opensaml:opensaml:2.4.1') {
 			transitive = false
 		}

@@ -14,16 +14,19 @@
  */
 package es.salenda.grails.plugins.springsecurity.saml
 
+import java.util.Collection;
+
 import org.opensaml.saml2.core.Attribute
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.saml.SAMLCredential
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService
 import org.springframework.util.Assert
 import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser;
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.hibernate.Session
 
@@ -37,101 +40,90 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 
 	def sessionFactory
 	def grailsApplication
-	
 
 	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
 		def securityConfig = SpringSecurityUtils.securityConfig
-		def username, fullName, email, password, authorities, user
-		
+		def username, authorities, user
+
 		username = getSamlUsername(securityConfig, credential)
-		password = ""
-		
-		log.debug "Loading database roles for $username..."
-		authorities = getAuthoritiesForUser(securityConfig, username, credential)
+		if (!username) {
+			throw new UsernameNotFoundException("No username supplied in saml response.")
+		}
 
 		String userDomainClassName = securityConfig.userLookup.userDomainClassName
 
 		Class<?> User = grailsApplication.getDomainClass(userDomainClassName).clazz
 		user = BeanUtils.instantiateClass(User)
 		user.username = username
-		user.password = password
+		user.password = ""
+
+		log.debug "Loading database roles for $username..."
+		authorities = getAuthoritiesForUser(securityConfig, username, credential)
 		
 		createUserDetails(user, authorities)
 	}
 	
 	protected String getSamlUsername(securityConfig, credential) {
-		def userMappings = securityConfig.userAttributeMappings
+		def userMappings = securityConfig.saml.userAttributeMappings
 		if (userMappings?.username) {
+			
 			def attribute = credential.getAttributeByName(userMappings.username)
 			def value = attribute?.attributeValues?.value
 			return value?.first()
-			
 		} else {
 			// if no mapping provided for username attribute then assume it is the returned subject in the assertion
-			return credential.nameID.value
+			return credential.nameID?.value
 		}
 	}
-	
-	protected String getSamlAttribute(SAMLCredential credential, String attributeName) {
- 		Attribute attribute = credential.getAttributeByName(attributeName)
-		 
-		def attributeValue = attribute.getAttributeValues()[0]
-		
-		attributeValue.value
-	}
-		
-	protected GrailsUser mapSamlAttributes(credential, user, userAttributeMappings) {
-		userAttributeMappings.each { userProperty, attributeName ->
-			user."${userProperty}" = getSamlAttribute(credential, attributeName)
-		}
-		
-		user
-	}
-	
+
 	protected Collection<GrantedAuthority> getAuthoritiesForUser(ConfigObject securityConfig, String username, SAMLCredential credential) {
 		Collection<GrantedAuthority> authorities = []
 
-		def samlGroups = getSamlGroupsForUser(credential)
-		log.debug "User is a member of saml groups: ${samlGroups}"
-		
+		def samlGroups = getSamlGroups(credential)
+
 		Class<?> Role = grailsApplication.getDomainClass(securityConfig.authority.className).clazz
 		def groupToRoleMapping = SpringSecurityUtils.securityConfig.saml.userGroupToRoleMapping
 		def authorityFieldName = securityConfig.authority.nameField
+		
 		samlGroups.each { groupName ->
 			def role = groupToRoleMapping.get(groupName)
 			def authority = Role.findWhere("$authorityFieldName":role)
-			
+
 			if (authority) {
 				GrantedAuthority grantedAuthority = new GrantedAuthorityImpl(authority."$authorityFieldName")
 				authorities << grantedAuthority
-			} 
+			}
 		}
-		
+
 		authorities
 	}
-	
+
 	/**
-	 * Return the groups that the user is a memberOf.  
-	 * Expects the saml.userGroupAttribute to specify the saml assertion attribute that holds returned group membership data.
+	 * Extract the groups that the user is a member of from the saml assertion.
+	 * Expects the saml.userGroupAttribute to specify the saml assertion attribute that holds 
+	 * returned group membership data.
+	 * 
+	 * Expects the group strings to be of the format "CN=groupName,someOtherParam=someOtherValue"
 	 * 
 	 * @param credential
-	 * @return 
+	 * @return list of groups
 	 */
-	protected List getSamlGroupsForUser(SAMLCredential credential) {
+	protected List getSamlGroups(SAMLCredential credential) {
 		def userGroups = []
-		
+
 		def groupAttribute = SpringSecurityUtils.securityConfig.saml.userGroupAttribute
 		if (groupAttribute) {
-			credential.getAttributeByName(groupAttribute).each { attribute ->
-				attribute.getAttributeValues().each { attributeValue ->
-					log.debug "Processing group attribute value: ${attributeValue.value}"
+			def attributes = credential.getAttributeByName(groupAttribute)
 			
+			attributes.each { attribute ->
+				attribute.attributeValues?.each { attributeValue ->
+					log.debug "Processing group attribute value: ${attributeValue}"
+
 					def groupString = attributeValue.value
-			
 					groupString.tokenize(',').each { token ->
 						def keyValuePair = token.tokenize('=')
-				
+
 						if (keyValuePair.first() == 'CN') {
 							userGroups << keyValuePair.last()
 						}
@@ -139,9 +131,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 				}
 			}
 		}
-		
+
 		userGroups
 	}
-	
-	
 }

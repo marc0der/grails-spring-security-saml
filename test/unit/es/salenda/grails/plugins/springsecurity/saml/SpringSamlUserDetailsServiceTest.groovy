@@ -95,9 +95,11 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		
 		try {
 			def user = userDetailsService.loadUserBySAML(credential)
-			fail()
+			fail("Null username in saml response not handled correctly!")
 		} catch (UsernameNotFoundException unfException) {
 			assert unfException.message == "No username supplied in saml response."
+		} catch (Exception ex) {
+			fail("Unexpected exception raised.")
 		}
 	}
 

@@ -14,21 +14,18 @@
  */
 package es.salenda.grails.plugins.springsecurity.saml
 
-import java.util.Collection;
+import java.util.Collection
 
+import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.opensaml.saml2.core.Attribute
-import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.beans.BeanUtils
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.saml.SAMLCredential
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService
-import org.springframework.util.Assert
-import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.hibernate.Session
 
 /**
  * A {@link GormUserDetailsService} extension to read attributes from a LDAP-backed 

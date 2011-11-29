@@ -3,6 +3,8 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
 
 import org.springframework.core.io.ClassPathResource;
+import org.codehaus.groovy.grails.plugins.springsecurity.AjaxAwareAuthenticationFailureHandler
+import org.springframework.security.web.DefaultRedirectStrategy
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
@@ -222,6 +224,19 @@ SAML 2.x support for the Spring Security Plugin
 			authenticationManager = ref('authenticationManager')
 			authenticationSuccessHandler = ref('successRedirectHandler')
 			sessionAuthenticationStrategy = ref('sessionFixationProtectionStrategy')
+			authenticationFailureHandler = ref('authenticationFailureHandler')
+		}
+		
+		authenticationFailureHandler(AjaxAwareAuthenticationFailureHandler) {
+			redirectStrategy = ref('redirectStrategy')
+			defaultFailureUrl = conf.failureHandler.defaultFailureUrl //'/login/authfail?login_error=1'
+			useForward = conf.failureHandler.useForward // false
+			ajaxAuthenticationFailureUrl = conf.failureHandler.ajaxAuthFailUrl // '/login/authfail?ajax=true'
+			exceptionMappings = conf.failureHandler.exceptionMappings // [:]
+		}
+		
+		redirectStrategy(DefaultRedirectStrategy) {
+			contextRelative = conf.redirectStrategy.contextRelative // false
 		}
 
 		sessionFixationProtectionStrategy(SessionFixationProtectionStrategy)

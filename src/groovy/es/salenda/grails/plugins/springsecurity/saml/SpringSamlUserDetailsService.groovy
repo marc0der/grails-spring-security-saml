@@ -17,6 +17,7 @@ package es.salenda.grails.plugins.springsecurity.saml
 import java.util.Collection
 
 import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.opensaml.saml2.core.Attribute
 import org.springframework.beans.BeanUtils
@@ -40,31 +41,28 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 
 	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
-		def securityConfig = SpringSecurityUtils.securityConfig
+		def conf = SpringSecurityUtils.securityConfig
 		def username, authorities, user
 
-		username = getSamlUsername(securityConfig, credential)
+		username = getSamlUsername(credential)
 		if (!username) {
 			throw new UsernameNotFoundException("No username supplied in saml response.")
 		}
-
-		String userDomainClassName = securityConfig.userLookup.userDomainClassName
-
-		Class<?> User = grailsApplication.getDomainClass(userDomainClassName).clazz
-		user = BeanUtils.instantiateClass(User)
-		user.username = username
-		user.password = ""
-
-		log.debug "Loading database roles for $username..."
-		authorities = getAuthoritiesForUser(securityConfig, username, credential)
 		
+		user = generateSecurityUser(username)
+		
+		log.debug "Loading database roles for $username..."
+		authorities = getAuthoritiesForUser(username, credential)
+
 		createUserDetails(user, authorities)
 	}
-	
-	protected String getSamlUsername(securityConfig, credential) {
-		def userMappings = securityConfig.saml.userAttributeMappings
+
+	protected String getSamlUsername(credential) {
+		def conf = SpringSecurityUtils.securityConfig
+		def userMappings = conf.saml.userAttributeMappings
+		
 		if (userMappings?.username) {
-			
+
 			def attribute = credential.getAttributeByName(userMappings.username)
 			def value = attribute?.attributeValues?.value
 			return value?.first()
@@ -74,15 +72,16 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		}
 	}
 
-	protected Collection<GrantedAuthority> getAuthoritiesForUser(ConfigObject securityConfig, String username, SAMLCredential credential) {
+	protected Collection<GrantedAuthority> getAuthoritiesForUser(String username, SAMLCredential credential) {
+		def conf = SpringSecurityUtils.securityConfig
 		Collection<GrantedAuthority> authorities = []
 
 		def samlGroups = getSamlGroups(credential)
 
-		Class<?> Role = grailsApplication.getDomainClass(securityConfig.authority.className).clazz
-		def groupToRoleMapping = SpringSecurityUtils.securityConfig.saml.userGroupToRoleMapping
-		def authorityFieldName = securityConfig.authority.nameField
-		
+		Class<?> Role = grailsApplication.getDomainClass(conf.authority.className).clazz
+		def groupToRoleMapping = conf.saml.userGroupToRoleMapping
+		def authorityFieldName = conf.authority.nameField
+
 		samlGroups.each { groupName ->
 			def role = groupToRoleMapping.get(groupName)
 			def authority = Role.findWhere("$authorityFieldName":role)
@@ -112,7 +111,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		def groupAttribute = SpringSecurityUtils.securityConfig.saml.userGroupAttribute
 		if (groupAttribute) {
 			def attributes = credential.getAttributeByName(groupAttribute)
-			
+
 			attributes.each { attribute ->
 				attribute.attributeValues?.each { attributeValue ->
 					log.debug "Processing group attribute value: ${attributeValue}"
@@ -130,5 +129,29 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		}
 
 		userGroups
+	}
+
+	private Object generateSecurityUser(username) {
+		def conf = SpringSecurityUtils.securityConfig
+		String userDomainClassName = conf.userLookup.userDomainClassName
+		Class<?> UserClass = grailsApplication.getDomainClass(userDomainClassName).clazz
+		def user = BeanUtils.instantiateClass(UserClass)
+		user.username = username
+		user.password = "password"
+		
+		saveUser(conf.saml.autoCreate, UserClass, user)
+		
+		user
+	}
+	
+	private void saveUser(autoCreateConf, userClazz, user) {
+		if (autoCreateConf?.active) {
+			def userKey = autoCreateConf?.key
+			def existingUser = userClazz.findWhere("$userKey": user."$userKey")
+			
+			if (!existingUser) {
+				assert user.save()
+			}
+		}
 	}
 }

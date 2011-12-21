@@ -48,11 +48,13 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		if (!username) {
 			throw new UsernameNotFoundException("No username supplied in saml response.")
 		}
-		
+
 		user = generateSecurityUser(username)
-		
+
 		log.debug "Loading database roles for $username..."
-		authorities = getAuthoritiesForUser(username, credential)
+		authorities = getAuthoritiesForUser(credential)
+
+		saveUser(user.class, user, authorities)
 
 		createUserDetails(user, authorities)
 	}
@@ -60,7 +62,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	protected String getSamlUsername(credential) {
 		def conf = SpringSecurityUtils.securityConfig
 		def userMappings = conf.saml.userAttributeMappings
-		
+
 		if (userMappings?.username) {
 
 			def attribute = credential.getAttributeByName(userMappings.username)
@@ -72,7 +74,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		}
 	}
 
-	protected Collection<GrantedAuthority> getAuthoritiesForUser(String username, SAMLCredential credential) {
+	protected Collection<GrantedAuthority> getAuthoritiesForUser(SAMLCredential credential) {
 		def conf = SpringSecurityUtils.securityConfig
 		Collection<GrantedAuthority> authorities = []
 
@@ -138,20 +140,35 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		def user = BeanUtils.instantiateClass(UserClass)
 		user.username = username
 		user.password = "password"
-		
-		saveUser(conf.saml.autoCreate, UserClass, user)
-		
+
 		user
 	}
-	
-	private void saveUser(autoCreateConf, userClazz, user) {
+
+	private void saveUser(userClazz, user, authorities) {
+		def autoCreateConf = SpringSecurityUtils.securityConfig.saml?.autoCreate
 		if (autoCreateConf?.active) {
 			def userKey = autoCreateConf?.key
 			def existingUser = userClazz.findWhere("$userKey": user."$userKey")
-			
+
 			if (!existingUser) {
-				assert user.save()
+				userClazz.withTransaction { user.save() }
 			}
+
+			updateUserRoles(user, authorities)
+		}
+	}
+
+	private void updateUserRoles(user, authorities) {
+		def conf = SpringSecurityUtils.securityConfig
+		Class<?> joinClass = grailsApplication.getDomainClass(conf.userLookup.authorityJoinClassName)?.clazz
+
+		joinClass.removeAll user
+		
+		Class<?> Role = grailsApplication.getDomainClass(conf.authority.className).clazz
+		authorities.each { grantedAuthority ->
+			def role = BeanUtils.instantiateClass(Role)
+			role.authority = grantedAuthority.authority
+			joinClass.create(user, role)
 		}
 	}
 }

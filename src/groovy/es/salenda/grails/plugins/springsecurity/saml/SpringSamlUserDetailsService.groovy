@@ -79,8 +79,6 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		Collection<GrantedAuthority> authorities = []
 
 		def samlGroups = getSamlGroups(credential)
-
-		Class<?> Role = grailsApplication.getDomainClass(conf.authority.className).clazz
 		def groupToRoleMapping = conf.saml.userGroupToRoleMapping
 		def authorityFieldName = conf.authority.nameField
 

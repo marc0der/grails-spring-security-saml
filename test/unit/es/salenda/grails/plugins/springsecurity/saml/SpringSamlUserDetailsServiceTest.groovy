@@ -1,6 +1,6 @@
-
-
 package es.salenda.grails.plugins.springsecurity.saml
+
+import static es.salenda.grails.plugins.springsecurity.saml.UnitTestUtils.*
 
 import grails.test.GrailsUnitTestCase
 import groovy.util.ConfigObject
@@ -11,6 +11,7 @@ import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClassProperty
 import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.tools.groovydoc.MockOutputTool;
 import org.opensaml.saml2.core.impl.AssertionImpl
 import org.opensaml.saml2.core.impl.NameIDImpl
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -21,14 +22,8 @@ import test.TestSamlUser
 import test.TestUserRole
 
 class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
-	static final String ROLE = "ROLE_ADMIN"
-	
 	def userDetailsService, credential, nameID, assertion, mockGrailsAplication, config
-	def userClassName = 'test.TestUser'
-	def roleClassName = 'test.TestRole'
-	def joinClassName = "test.TestUserRole"
-	def groupAttributeName = 'groups'
-	def usernameAttributeName = 'usernameAttribute'
+
 	def username = "jackSparrow"
 
 	@Override
@@ -43,18 +38,22 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		// This is what a SamlResponse will eventually be marshalled to
 		credential = new SAMLCredential(nameID, assertion, null, null)
 
+		registerMetaClass DefaultGrailsApplication
 		mockOutDefaultGrailsApplication()
 		userDetailsService.grailsApplication = new DefaultGrailsApplication()
 
 		// set default username to be returned in the saml response
-		setMockSamlAttributes(["$usernameAttributeName": username])
+		setMockSamlAttributes(credential, ["$USERNAME_ATTR_NAME": username])
 
-		setTestConfig()
+		config = setTestConfig()
 		
+		registerMetaClass TestRole
 		registerMetaClass TestUserRole
 		TestUserRole.metaClass.'static'.removeAll = { TestSamlUser userWithRoles ->}
-		
 		TestUserRole.metaClass.'static'.create = { TestSamlUser userWithNoRoles, TestRole role ->}
+		
+		registerMetaClass TestSamlUser
+		
 	}
 
 	
@@ -70,7 +69,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	 * When no attribute mapping is specified for the username value then the NameID should be used 
 	 */
 	void testLoadUserWithSamlNameId() {
-		setMockSamlAttributes(["$usernameAttributeName": "someotherValue"])
+		setMockSamlAttributes(credential, ["$USERNAME_ATTR_NAME": "someotherValue"])
 		def additionalConfig = [saml:[userAttributeMappings:[username: null]]]
 		config.putAll additionalConfig
 
@@ -81,6 +80,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		assert user.username == username
 	}
 
+	
 	void testLoadUserUsernameAsAttribute() {
 		def user = userDetailsService.loadUserBySAML(credential)
 
@@ -89,13 +89,15 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 
 	
 	void testLoadUserUsernameAsAttributeUsernameNotSupplied() {
-		setMockSamlAttributes(["$usernameAttributeName": null])
+		setMockSamlAttributes(credential, ["$USERNAME_ATTR_NAME": null])
 
 		try {
 			def user = userDetailsService.loadUserBySAML(credential)
 			fail("Null username in saml response not handled correctly!")
+			
 		} catch (UsernameNotFoundException unfException) {
 			assert unfException.message == "No username supplied in saml response."
+			
 		} catch (Exception ex) {
 			fail("Unexpected exception raised.")
 		}
@@ -103,18 +105,15 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	
 
 	void testAuthorityMappingsUserHasRole() {
-		def additionalConfig = [saml:
-					[userGroupAttribute: groupAttributeName, userGroupToRoleMapping: ['myGroup': ROLE],
-						userAttributeMappings:[username: usernameAttributeName]]
-				]
+		def additionalConfig = [saml:[
+			userGroupAttribute: GROUP_ATTR_NAME, userGroupToRoleMapping: ['myGroup': ROLE],
+			userAttributeMappings:[username: USERNAME_ATTR_NAME]
+		]]
 		config.putAll additionalConfig
 
-		registerMetaClass TestRole
-		// mockDomain does not support findWhere until grails 1.4
+		
+		setMockSamlAttributes(credential, ["$GROUP_ATTR_NAME": "something=something,CN=myGroup", "$USERNAME_ATTR_NAME": 'myUsername'])
 		TestRole.metaClass.static.findWhere = {new TestRole(authority: ROLE)}
-
-		setMockSamlAttributes(["$groupAttributeName": "something=something,CN=myGroup",
-					"$usernameAttributeName": 'myUsername'])
 
 		def user = userDetailsService.loadUserBySAML(credential)
 
@@ -133,17 +132,16 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 
 	
 	void testUserPersistedWhenFlaggedAndNotExists() {
-		mockDomain TestSamlUser, []
-
 		stubTestSamlUserMethods()
-
-		def additionalConfig = [saml:[autoCreate: [active: true, key: 'username'],
-						userAttributeMappings:[username: usernameAttributeName]]
-				]
+		mockDomain TestSamlUser, []
+		
+		def additionalConfig = [saml:[
+			autoCreate: [active: true, key: 'username'],
+			userAttributeMappings:[username: USERNAME_ATTR_NAME]
+		]]
 		config.putAll additionalConfig
 
 		assert TestSamlUser.count() == 0
-
 		def userDetails = userDetailsService.loadUserBySAML(credential)
 
 		assert TestSamlUser.count() == 1
@@ -153,19 +151,18 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 
 	void testUserNotPersistedWhenFlaggedAndExists() {
 		def additionalConfig = [saml: [
-						autoCreate: [active: true, key: 'username'],
-						userAttributeMappings:[username: usernameAttributeName]
-					]]
-
+			autoCreate: [active: true, key: 'username'],
+			userAttributeMappings:[username: USERNAME_ATTR_NAME]
+		]]
 		config.putAll additionalConfig
 
 		def user = new TestSamlUser(username: username, password: 'test')
 		mockDomain TestSamlUser, [user]
-
 		stubTestSamlUserMethods(user)
 
 		assert TestSamlUser.count() == 1
 		def userDetail = userDetailsService.loadUserBySAML(credential)
+		
 		assert TestSamlUser.count() == 1
 	}
 
@@ -173,29 +170,24 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	void testUserNewUserAuthoritiesPersisted() {
 		mockDomain TestUserRole, []
 		def additionalConfig = [saml: [
-						userGroupAttribute: groupAttributeName, userGroupToRoleMapping: ['myGroup': ROLE],
-						autoCreate: [active: true, key: 'username'],
-						userAttributeMappings:[username: usernameAttributeName]
-					]]
+			userGroupAttribute: GROUP_ATTR_NAME, userGroupToRoleMapping: ['myGroup': ROLE],
+			autoCreate: [active: true, key: 'username'], userAttributeMappings: [username: USERNAME_ATTR_NAME]
+		]]
 		config.putAll additionalConfig
 		
-		registerMetaClass TestRole
 		TestRole.metaClass.static.findWhere = {new TestRole(authority: ROLE)}
+		setMockSamlAttributes(credential, ["$GROUP_ATTR_NAME": "something=something,CN=myGroup", "$USERNAME_ATTR_NAME": username])
 
-		setMockSamlAttributes(["$groupAttributeName": "something=something,CN=myGroup", "$usernameAttributeName": username])
+		mockDomain TestSamlUser, []
+		stubTestSamlUserMethods()
 
-		def user = new TestSamlUser(username: username, password: 'test')
-		mockDomain TestSamlUser, [user]
-
-		stubTestSamlUserMethods(user)
-
-		registerMetaClass TestUserRole
 		TestUserRole.metaClass.'static'.removeAll = { TestSamlUser userWithRoles -> 
-			assert userWithRoles.username == user.username
+			// no roles to remove
+			assert false
 		}
 		
 		TestUserRole.metaClass.'static'.create = { TestSamlUser userWithNoRoles, TestRole role -> 
-			assert userWithNoRoles.username == user.username
+			assert userWithNoRoles.username == username
 			assert role.authority == ROLE
 		}
 		
@@ -203,76 +195,30 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	}
 
 	
-	/**
-	 * Helper methods
-	 */
+	void testUserExistingUserAuthoritiesUpdated() {
+		mockDomain TestUserRole, []
+		def additionalConfig = [saml: [
+			userGroupAttribute: GROUP_ATTR_NAME, userGroupToRoleMapping: ['myGroup': ROLE],
+			autoCreate: [active: true, key: 'username'], userAttributeMappings: [username: USERNAME_ATTR_NAME]
+		]]
+		config.putAll additionalConfig
+		
+		TestRole.metaClass.static.findWhere = {new TestRole(authority: ROLE)}
+		setMockSamlAttributes(credential, ["$GROUP_ATTR_NAME": "something=something,CN=myGroup", "$USERNAME_ATTR_NAME": username])
 
-	/**
-	 * mock out DefaultGrailsApplication which is used to return grails domain class for a given name  
-	 */
-	private void mockOutDefaultGrailsApplication() {
-		registerMetaClass DefaultGrailsApplication
-		DefaultGrailsApplication.metaClass.getDomainClass { className ->
-			if (className == roleClassName) {
-				return new DefaultGrailsDomainClass(TestRole.class, [:])
-			} else if (className == userClassName) {
-				return new DefaultGrailsDomainClass(TestSamlUser.class, [:])
-			} else if (className == joinClassName) {
-				return new DefaultGrailsDomainClass(TestUserRole.class, [:])
-			}
-			return null
+		def user = new TestSamlUser(username: username, password: 'test')
+		mockDomain TestSamlUser, [user]
+		stubTestSamlUserMethods(user)
+
+		TestUserRole.metaClass.'static'.removeAll = { TestSamlUser userWithRoles ->
+			assert userWithRoles.username == user.username
 		}
-	}
-
-	private setMockSamlAttributes(attributes=[:]) {
-		credential.metaClass.getAttributeByName = { String name ->
-			if ( name == usernameAttributeName) {
-				return [attributeValues: [
-						[value: attributes.get("$usernameAttributeName")]
-					]
-				]
-			}
-			else if (name == groupAttributeName) {
-				return [
-					[attributeValues: [
-							[value: attributes.get("$groupAttributeName")]
-						]
-					]
-				]
-			}
-
-			return []
+		
+		TestUserRole.metaClass.'static'.create = { TestSamlUser userWithNoRoles, TestRole role ->
+			assert userWithNoRoles.username == user.username
+			assert role.authority == ROLE
 		}
-	}
-
-	private setTestConfig() {
-		config = new ConfigObject()
-
-		// set spring security core configuration and saml security config
-		config.putAll([
-					authority:[nameField:"authority", className: roleClassName],
-					userLookup:[
-						userDomainClassName: userClassName,
-						authorityJoinClassName: joinClassName,
-						passwordPropertyName: "password",
-						usernamePropertyName: "username",
-						enabledPropertyName:"enabled",
-						authoritiesPropertyName: "authorities",
-						accountExpiredPropertyName: "accountExpired",
-						accountLockedPropertyName: "accountLocked",
-						passwordExpiredPropertyName: "passwordExpired"
-					],
-					saml:[userAttributeMappings:[username: usernameAttributeName]]
-				])
-
-		SpringSecurityUtils.metaClass.static.getSecurityConfig = { config }
-	}
-
-	private stubTestSamlUserMethods(user) {
-		registerMetaClass TestSamlUser
-		TestSamlUser.metaClass.static.findWhere = {user}
-		TestSamlUser.metaClass.'static'.withTransaction = { Closure callable ->
-			callable.call(null)
-		}
+		
+		def userDetail = userDetailsService.loadUserBySAML(credential)
 	}
 }

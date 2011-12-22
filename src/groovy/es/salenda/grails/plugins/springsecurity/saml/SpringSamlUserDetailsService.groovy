@@ -86,7 +86,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 
 		samlGroups.each { groupName ->
 			def role = groupToRoleMapping.get(groupName)
-			def authority = Role.findWhere("$authorityFieldName":role)
+			def authority = getRole(role)
 
 			if (authority) {
 				GrantedAuthority grantedAuthority = new GrantedAuthorityImpl(authority."$authorityFieldName")
@@ -145,30 +145,34 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	}
 
 	private void saveUser(userClazz, user, authorities) {
-		def autoCreateConf = SpringSecurityUtils.securityConfig.saml?.autoCreate
-		if (autoCreateConf?.active) {
-			def userKey = autoCreateConf?.key
+		def conf = SpringSecurityUtils.securityConfig
+		if (conf.saml.autoCreate?.active) {
+			def userKey = conf.saml.autoCreate?.key
 			def existingUser = userClazz.findWhere("$userKey": user."$userKey")
 
-			if (!existingUser) {
-				userClazz.withTransaction { user.save() }
-			}
+			Class<?> joinClass = grailsApplication.getDomainClass(conf.userLookup.authorityJoinClassName)?.clazz
 
-			updateUserRoles(user, authorities)
+			userClazz.withTransaction {
+				if (!existingUser) {
+					user.save()
+				} else {
+					user = existingUser
+					joinClass.removeAll user
+				}
+
+				authorities.each { grantedAuthority ->
+					def role = getRole(grantedAuthority."${conf.authority.nameField}")
+					joinClass.create(user, role)
+				}
+			}
 		}
 	}
-
-	private void updateUserRoles(user, authorities) {
+	
+	private Object getRole(String authority) {
 		def conf = SpringSecurityUtils.securityConfig
-		Class<?> joinClass = grailsApplication.getDomainClass(conf.userLookup.authorityJoinClassName)?.clazz
-
-		joinClass.removeAll user
+		def authorityFieldName = conf.authority.nameField
 		
 		Class<?> Role = grailsApplication.getDomainClass(conf.authority.className).clazz
-		authorities.each { grantedAuthority ->
-			def role = BeanUtils.instantiateClass(Role)
-			role.authority = grantedAuthority.authority
-			joinClass.create(user, role)
-		}
+		Role.findWhere("$authorityFieldName":authority)
 	}
 }

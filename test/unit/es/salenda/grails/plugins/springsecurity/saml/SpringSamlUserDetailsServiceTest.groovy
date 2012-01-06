@@ -22,7 +22,7 @@ import test.TestSamlUser
 import test.TestUserRole
 
 class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
-	def userDetailsService, credential, nameID, assertion, mockGrailsAplication, config
+	def service, credential, nameID, assertion, mockGrailsAplication, config
 
 	def username = "jackSparrow"
 
@@ -30,7 +30,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	protected void setUp() {
 		super.setUp()
 
-		userDetailsService = new SpringSamlUserDetailsService()
+		service = new SpringSamlUserDetailsService()
 
 		nameID = new NameIDImpl("", "", "")
 		assertion = new AssertionImpl("", "", "")
@@ -40,7 +40,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 
 		registerMetaClass DefaultGrailsApplication
 		mockOutDefaultGrailsApplication()
-		userDetailsService.grailsApplication = new DefaultGrailsApplication()
+		service.grailsApplication = new DefaultGrailsApplication()
 
 		// set default username to be returned in the saml response
 		setMockSamlAttributes(credential, ["$USERNAME_ATTR_NAME": username])
@@ -60,7 +60,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 	void testUserInstanceClassIsGrailsUser() {
 		credential.metaClass.getNameID = { [value:"jackSparrow"] }
 
-		def user = userDetailsService.loadUserBySAML(credential)
+		def user = service.loadUserBySAML(credential)
 		assert user instanceof GrailsUser
 	}
 
@@ -75,14 +75,14 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 
 		credential.metaClass.getNameID = { [value:"$username"] }
 
-		def user = userDetailsService.loadUserBySAML(credential)
+		def user = service.loadUserBySAML(credential)
 
 		assert user.username == username
 	}
 
 	
 	void testLoadUserUsernameAsAttribute() {
-		def user = userDetailsService.loadUserBySAML(credential)
+		def user = service.loadUserBySAML(credential)
 
 		assert user.username == username
 	}
@@ -92,7 +92,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		setMockSamlAttributes(credential, ["$USERNAME_ATTR_NAME": null])
 
 		try {
-			def user = userDetailsService.loadUserBySAML(credential)
+			def user = service.loadUserBySAML(credential)
 			fail("Null username in saml response not handled correctly!")
 			
 		} catch (UsernameNotFoundException unfException) {
@@ -115,7 +115,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		setMockSamlAttributes(credential, ["$GROUP_ATTR_NAME": "something=something,CN=myGroup", "$USERNAME_ATTR_NAME": 'myUsername'])
 		TestRole.metaClass.static.findWhere = {new TestRole(authority: ROLE)}
 
-		def user = userDetailsService.loadUserBySAML(credential)
+		def user = service.loadUserBySAML(credential)
 
 		assert user.authorities.size() == 1
 		assert user.authorities.toArray()[0].authority == ROLE
@@ -126,7 +126,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		mockDomain TestSamlUser, []
 
 		assert TestSamlUser.count() == 0
-		def userDetails = userDetailsService.loadUserBySAML(credential)
+		def userDetails = service.loadUserBySAML(credential)
 		assert TestSamlUser.count() == 0
 	}
 
@@ -142,7 +142,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		config.putAll additionalConfig
 
 		assert TestSamlUser.count() == 0
-		def userDetails = userDetailsService.loadUserBySAML(credential)
+		def userDetails = service.loadUserBySAML(credential)
 
 		assert TestSamlUser.count() == 1
 		assert TestSamlUser.findByUsername(userDetails.username)
@@ -161,7 +161,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 		stubTestSamlUserMethods(user)
 
 		assert TestSamlUser.count() == 1
-		def userDetail = userDetailsService.loadUserBySAML(credential)
+		def userDetail = service.loadUserBySAML(credential)
 		
 		assert TestSamlUser.count() == 1
 	}
@@ -191,7 +191,7 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 			assert role.authority == ROLE
 		}
 		
-		def userDetail = userDetailsService.loadUserBySAML(credential)
+		def userDetail = service.loadUserBySAML(credential)
 	}
 
 	
@@ -219,6 +219,6 @@ class SpringSamlUserDetailsServiceTest extends GrailsUnitTestCase {
 			assert role.authority == ROLE
 		}
 		
-		def userDetail = userDetailsService.loadUserBySAML(credential)
+		def userDetail = service.loadUserBySAML(credential)
 	}
 }

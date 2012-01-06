@@ -55,10 +55,13 @@ class UnitTestUtils {
    static void mockOutDefaultGrailsApplication() {
 	   DefaultGrailsApplication.metaClass.getDomainClass { className ->
 		   if (className == ROLE_CLASS_NAME) {
+			   
 			   return new DefaultGrailsDomainClass(TestRole.class, [:])
 		   } else if (className == USER_CLASS_NAME) {
+		   
 			   return new DefaultGrailsDomainClass(TestSamlUser.class, [:])
 		   } else if (className == JOIN_CLASS_NAME) {
+		   
 			   return new DefaultGrailsDomainClass(TestUserRole.class, [:])
 		   }
 		   return null

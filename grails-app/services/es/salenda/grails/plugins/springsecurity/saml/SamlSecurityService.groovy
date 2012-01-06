@@ -14,6 +14,8 @@
  */
 package es.salenda.grails.plugins.springsecurity.saml
 
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils;
+
 import grails.plugins.springsecurity.SpringSecurityService
 
 /**
@@ -31,6 +33,21 @@ class SamlSecurityService extends SpringSecurityService {
 		if (!isLoggedIn()) {
 			return null
 		}
-		getAuthentication().details
+		
+		def userDetails = getAuthentication().details
+		if ( SpringSecurityUtils.securityConfig.saml?.autoCreate?.active ) { 
+			return getCurrentPersistedUser(userDetails)
+		} 
+		
+		return userDetails
+	}
+	
+	Object getCurrentPersistedUser(userDetails) {
+		def config = SpringSecurityUtils.securityConfig
+		String className = config.userLookup.userDomainClassName
+		String userKey = config.saml.autoCreate.key
+		
+		Class<?> userClass = grailsApplication.getDomainClass(className)?.clazz
+		return userClass."findBy${userKey.capitalize()}"(userDetails."$userKey")
 	}
 }

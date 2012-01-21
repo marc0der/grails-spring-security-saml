@@ -212,6 +212,16 @@ SAML 2.x support for the Spring Security Plugin
 		userDetailsService(SpringSamlUserDetailsService) {
 			grailsApplication = ref('grailsApplication')
 			sessionFactory = ref('sessionFactory')
+
+			samlUserGroupToRoleMapping = conf.saml.userGroupToRoleMapping
+			samlUserAttributeMappings = conf.saml.userAttributeMappings
+			samlUserGroupAttribute = conf.saml.userGroupAttribute
+			samlAutoCreateKey = conf.saml.autoCreate.key
+			userDomainClassName = conf.userLookup.userDomainClassName
+			authorityNameField = conf.authority.nameField
+			samlAutoCreateActive = conf.saml.autoCreate.active
+			authorityJoinClassName = conf.userLookup.authorityJoinClassName
+			authorityClassName = conf.authority.className
 		}
 		
 		samlAuthenticationProvider(GrailsSAMLAuthenticationProvider) {

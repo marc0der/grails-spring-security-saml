@@ -42,12 +42,15 @@ class SamlSecurityService extends SpringSecurityService {
 		return userDetails
 	}
 	
-	Object getCurrentPersistedUser(userDetails) {
-		def config = SpringSecurityUtils.securityConfig
-		String className = config.userLookup.userDomainClassName
-		String userKey = config.saml.autoCreate.key
-		
-		Class<?> userClass = grailsApplication.getDomainClass(className)?.clazz
-		return userClass."findBy${userKey.capitalize()}"(userDetails."$userKey")
+	Object getCurrentPersistedUser() {
+		def userDetails = getAuthentication().details
+		if (userDetails) {
+			def config = SpringSecurityUtils.securityConfig
+			String className = config.userLookup.userDomainClassName
+			String userKey = config.saml.autoCreate.key
+			
+			Class<?> userClass = grailsApplication.getDomainClass(className)?.clazz
+			return userClass."findBy${userKey.capitalize()}"(userDetails."$userKey")
+		} else { return null}
 	}
 }

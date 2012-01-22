@@ -29,28 +29,29 @@ class SamlSecurityService extends SpringSecurityService {
 
 	static transactional = false
 
+	def config = SpringSecurityUtils.securityConfig
+
 	Object getCurrentUser() {
+		def userDetails
 		if (!isLoggedIn()) {
-			return null
+			userDetails = null
+		} else {
+			userDetails = getAuthentication().details
+			if ( config?.saml.autoCreate.active ) { 
+				userDetails =  getCurrentPersistedUser(userDetails)
+			}
 		}
-		
-		def userDetails = getAuthentication().details
-		if ( SpringSecurityUtils.securityConfig.saml?.autoCreate?.active ) { 
-			return getCurrentPersistedUser(userDetails)
-		} 
-		
 		return userDetails
 	}
 	
-	Object getCurrentPersistedUser() {
-		def userDetails = getAuthentication().details
+	Object getCurrentPersistedUser(userDetails) {
 		if (userDetails) {
-			def config = SpringSecurityUtils.securityConfig
-			String className = config.userLookup.userDomainClassName
-			String userKey = config.saml.autoCreate.key
-			
-			Class<?> userClass = grailsApplication.getDomainClass(className)?.clazz
-			return userClass."findBy${userKey.capitalize()}"(userDetails."$userKey")
+			String className = config?.userLookup.userDomainClassName
+			String userKey = config?.saml.autoCreate.key
+			if (className && userKey) {
+				Class<?> userClass = grailsApplication.getDomainClass(className)?.clazz
+				return userClass."findBy${userKey.capitalize()}"(userDetails."$userKey")
+			}
 		} else { return null}
 	}
 }

@@ -33,36 +33,35 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService
  */
 class SpringSamlUserDetailsService extends GormUserDetailsService implements SAMLUserDetailsService {
 
-	def sessionFactory
-	def grailsApplication
-
 	// Spring bean injected configuration parameters
-	def samlUserGroupToRoleMapping
-	String samlUserAttributeMappings
-	String samlUserGroupAttribute
-	String samlAutoCreateKey
-	String userDomainClassName
+	String authorityClassName
+	String authorityJoinClassName
 	String authorityNameField
 	Boolean samlAutoCreateActive
-	String authorityJoinClassName
-	String authorityClassName
-
+	String samlAutoCreateKey
+	Map samlUserAttributeMappings
+	Map samlUserGroupToRoleMapping
+	String samlUserGroupAttribute
+	String userDomainClassName
 
 	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
-		String username = getSamlUsername(credential)
-		if (!username) {
-			throw new UsernameNotFoundException("No username supplied in saml response.")
+		if (credential) {
+			String username = getSamlUsername(credential)
+			if (!username) {
+				throw new UsernameNotFoundException("No username supplied in saml response.")
+			}
+
+			def user = generateSecurityUser(username)
+			if (user) {
+				log.debug "Loading database roles for $username..."
+				def authorities = getAuthoritiesForUser(credential)
+				saveUser(user.class, user, authorities)
+				createUserDetails(user, authorities)
+			} else {
+				throw new InstantiationException('could not instantiate new user')
+			}
 		}
-
-		def user = generateSecurityUser(username)
-
-		log.debug "Loading database roles for $username..."
-		def authorities = getAuthoritiesForUser(credential)
-
-		saveUser(user.class, user, authorities)
-
-		createUserDetails(user, authorities)
 	}
 
 	protected String getSamlUsername(credential) {
@@ -116,7 +115,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 					log.debug "Processing group attribute value: ${attributeValue}"
 
 					def groupString = attributeValue.value
-					groupString.tokenize(',').each { token ->
+					groupString?.tokenize(',').each { token ->
 						def keyValuePair = token.tokenize('=')
 
 						if (keyValuePair.first() == 'CN') {
@@ -131,18 +130,28 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	}
 
 	private Object generateSecurityUser(username) {
-		Class<?> UserClass = grailsApplication.getDomainClass(userDomainClassName).clazz
-		def user = BeanUtils.instantiateClass(UserClass)
-		user.username = username
-		user.password = "password"
-
-		return user
+		if (userDomainClassName) {
+			Class<?> UserClass = grailsApplication.getDomainClass(userDomainClassName)?.clazz
+			if (UserClass) {
+				def user = BeanUtils.instantiateClass(UserClass)
+				user.username = username
+				user.password = "password"
+				return user
+			} else {
+				throw new ClassNotFoundException("domain class ${userDomainClassName} not found")
+			}
+		} else {
+				throw new ClassNotFoundException("security user domain class undefined")
+		}
 	}
 
 	private void saveUser(userClazz, user, authorities) {
 
-		if (samlAutoCreateActive) {
-			def existingUser = userClazz.findWhere("$samlAutoCreateKey": user."$samlAutoCreateKey")
+		if (userClazz && samlAutoCreateActive && samlAutoCreateKey 
+				&& authorityNameField && authorityJoinClassName) {
+
+			Map whereClause = [ "$samlAutoCreateKey": user."$samlAutoCreateKey" ]
+			def existingUser = userClazz.findWhere(whereClause)
 
 			Class<?> joinClass = grailsApplication.getDomainClass(authorityJoinClassName)?.clazz
 
@@ -163,8 +172,14 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	}
 	
 	private Object getRole(String authority) {
-		
-		Class<?> Role = grailsApplication.getDomainClass(conf.authority.className).clazz
-		Role.findWhere("$authorityNameField":authority)
+		if (authority && authorityNameField && authorityClassName) {
+			Class<?> Role = grailsApplication.getDomainClass(authorityClassName).clazz
+			if ( Role ) {
+				Map whereClause = [ "$authorityNameField": authority ]
+				Role.findWhere(whereClause)
+			} else {
+				throw new ClassNotFoundException("domain class ${authorityClassName} not found")
+			}
+		}
 	}
 }

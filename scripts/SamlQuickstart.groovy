@@ -14,10 +14,9 @@
  */
 
 includeTargets << new File("$springSecuritySamlPluginDir/scripts/_SamlCommon.groovy")
-includeTargets << new File("$springSecuritySamlPluginDir/scripts/_SamlConfig.groovy")
 includeTargets << grailsScript('_GrailsBootstrap')
 
-target (samlQuickstart: 'Creates base configuration files to aid saml integration.') {
+target (samlQuickstart: 'Creates security folder for SAML keystore.') {
 
 	ant.mkdir(dir:"${basedir}/grails-app/conf/security")
 	ant.copy(todir:"${basedir}/grails-app/conf/security") {
@@ -26,16 +25,10 @@ target (samlQuickstart: 'Creates base configuration files to aid saml integratio
 		}
 	}
 	
-	updateConfig baseConfig
-	
 	printMessage """
 *******************************************************
 * Created a keystore and example metadata file in     *
 * grails-app/conf/security.                           *
-*                                                     *
-* grails-app/conf/Config.groovy has been updated with *
-* base configuration parameters that you will want to *
-* change.                                             *
 *******************************************************
 """
 }

@@ -90,10 +90,14 @@ SAML 2.x support for the Spring Security Plugin
 
     def doWithSpring = {
 		def conf = SpringSecurityUtils.securityConfig
-		if (!conf || !conf.active || !conf.saml.active) {
-			println '\n\nSpring Security SAML is disabled, not loading\n\n'
+		if (!conf || !conf.active) {
+			println '\n\nSpring Security disabled, not loading\n\n'
 			return
 		}
+
+		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
+		conf = SpringSecurityUtils.securityConfig
+		if (!conf.saml.active) { return }
 		
 		println 'Configuring Spring Security SAML ...'
 
@@ -168,7 +172,7 @@ SAML 2.x support for the Spring Security Plugin
 		
 		// you can only define a single service provider configuration
 		def spFile = conf.saml.metadata.sp.file
-		def defaultSpConfig = conf.saml.metadata.sp.spMetadataDefaults
+		def defaultSpConfig = conf.saml.metadata.sp.defaults
 		if (spFile) {
 			
 			def spResource = new ClassPathResource(spFile)
@@ -212,6 +216,16 @@ SAML 2.x support for the Spring Security Plugin
 		userDetailsService(SpringSamlUserDetailsService) {
 			grailsApplication = ref('grailsApplication')
 			sessionFactory = ref('sessionFactory')
+
+			authorityClassName = conf.authority.className
+			authorityJoinClassName = conf.userLookup.authorityJoinClassName
+			authorityNameField = conf.authority.nameField
+			samlAutoCreateActive = conf.saml.autoCreate.active
+			samlAutoCreateKey = conf.saml.autoCreate.key
+			samlUserAttributeMappings = conf.saml.userAttributeMappings
+			samlUserGroupAttribute = conf.saml.userGroupAttribute
+			samlUserGroupToRoleMapping = conf.saml.userGroupToRoleMapping
+			userDomainClassName = conf.userLookup.userDomainClassName
 		}
 		
 		samlAuthenticationProvider(GrailsSAMLAuthenticationProvider) {
@@ -303,6 +317,8 @@ SAML 2.x support for the Spring Security Plugin
 			userDetailsService = ref('userDetailsService')
 			userCache = ref('userCache')
 		}
+
+		println '...finished configuring Spring Security SAML'
     }
 
     def doWithApplicationContext = { applicationContext ->
@@ -314,13 +330,5 @@ SAML 2.x support for the Spring Security Plugin
 		}
 		metadata.setProviders(providerBeans)
 		*/
-    }
-
-    def onChange = { event ->
-        // TODO reload
-    }
-
-    def onConfigChange = { event ->
-        // TODO reload
     }
 }

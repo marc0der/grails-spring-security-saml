@@ -15,20 +15,21 @@ import test.TestSamlUser
 
 class SamlSecurityServiceTest extends GrailsUnitTestCase {
 
-	def service, config, grailsUser, authToken, samlUser
+	def grailsUser, grailsApplication
 
 	@Override
 	protected void setUp() {
 		super.setUp()
-		service = new SamlSecurityService()
 		
 		registerMetaClass DefaultGrailsApplication
 		mockOutDefaultGrailsApplication()
-		service.grailsApplication = new DefaultGrailsApplication()
+		grailsApplication = new DefaultGrailsApplication()
+
+		mockOutSpringSecurityUtilsConfig()
 
 		grailsUser = new GrailsUser('username', 'password', true, true, true, true, [], 1)
 		
-		authToken = new UsernamePasswordAuthenticationToken(grailsUser.username, null)
+		def authToken = new UsernamePasswordAuthenticationToken(grailsUser.username, null)
 		authToken.setDetails(grailsUser)
 		
 		SecurityContextHolder.metaClass.static.getContext = {
@@ -39,15 +40,17 @@ class SamlSecurityServiceTest extends GrailsUnitTestCase {
 			authToken
 		}
 		
-		samlUser = new TestSamlUser(username: grailsUser.username, password: 'password')
+		def samlUser = new TestSamlUser(username: grailsUser.username, password: 'password')
 		mockDomain TestSamlUser, [samlUser]
 		
-		config = setTestConfig()
+		SamlSecurityService.metaClass.isLoggedIn = { true }
 	}
 
 	void testGetCurrentUserNotPersisted() {
-		
-		SamlSecurityService.metaClass.isLoggedIn = { true }
+		def service = new SamlSecurityService()
+		def fakeConfig = [ saml: [ autoCreate: [ active: false ] ] ]
+		service.config = fakeConfig
+		service.grailsApplication = grailsApplication
 		
 		def user = service.getCurrentUser()
 		assert user instanceof GrailsUser
@@ -55,11 +58,15 @@ class SamlSecurityServiceTest extends GrailsUnitTestCase {
 	}
 	
 	void testGetCurrentUserPersisted() {
-		def additionalConfig = [saml:[
-			autoCreate: [active: true, key: 'username'],
-		]]
-		config.putAll additionalConfig
-		
+		def service = new SamlSecurityService()
+		def fakeConfig = [
+			userLookup: [ userDomainClassName: USER_CLASS_NAME ],
+			saml: [ autoCreate: [
+					active: true,
+					key: 'username' ] ] ]
+		service.config = fakeConfig
+		service.grailsApplication = grailsApplication
+
 		def user = service.getCurrentUser()
 		assert user instanceof TestSamlUser
 		assert user.username == grailsUser.username

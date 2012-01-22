@@ -90,10 +90,7 @@ SAML 2.x support for the Spring Security Plugin
 
     def doWithSpring = {
 		def conf = SpringSecurityUtils.securityConfig
-		if (!conf || !conf.active) {
-			println '\n\nSpring Security disabled, not loading\n\n'
-			return
-		}
+		if (!conf || !conf.active) { return }
 
 		SpringSecurityUtils.loadSecondaryConfig 'DefaultSamlSecurityConfig'
 		conf = SpringSecurityUtils.securityConfig

@@ -35,12 +35,21 @@
 	                <li>Make sure to update your identity provider(s) with the generated metadata.</li>
 	                <li>
 						Update your Config.groovy and add the following lines:
-						<p>
+						<code>
 							grails.plugins.springsecurity.saml.metadata.sp.file = 'security/${storagePath}'
-						</p>
-						<p>
-						grails.plugins.springsecurity.saml.metadata.sp.spMetadataDefaults =['local':true,'alias':'${extendedMetadata.alias}','securityProfile':'${extendedMetadata.securityProfile?:'MetaIOP'}','signingKey':'${extendedMetadata.signingKey}','encryptionKey':'${extendedMetadata.encryptionKey}','tlsKey':'${extendedMetadata.tlsKey}','requireArtifactResolveSigned':${extendedMetadata.requireArtifactResolveSigned},'requireLogoutRequestSigned':${extendedMetadata.requireLogoutRequestSigned}, 'requireLogoutResponseSigned':${extendedMetadata.requireLogoutResponseSigned}]
-						</p>
+						</code>
+						<code>
+						grails.plugins.springsecurity.saml.metadata.sp.defaults = [
+					local: true, 
+					alias: 'test',
+					securityProfile: 'metaiop',
+					signingKey: 'ping',
+					encryptionKey: 'ping', 
+					tlsKey: 'ping',
+					requireArtifactResolveSigned: false,
+					requireLogoutRequestSigned: false, 
+					requireLogoutResponseSigned: false ]
+						</code>
 	                </li>
 	            </ol>			
 			</g:if>

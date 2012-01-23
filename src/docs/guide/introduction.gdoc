@@ -1,0 +1,7 @@
+h1. Spring Security SAML plugin
+
+The Spring Security SAML plugin aims to add SAML support to Spring Security
+
+{note}
+This is a work in progress.
+{note}

@@ -17,36 +17,38 @@ class UnitTestUtils {
 	static final USERNAME_ATTR_NAME = 'usernameAttribute'
 	static final GROUP_ATTR_NAME = 'groups'
 	
-	static ConfigObject setTestConfig() {
-		def config = new ConfigObject()
-
-		// set spring security core configuration and saml security config
-		config.putAll([
-					authority:[nameField:"authority", className: ROLE_CLASS_NAME],
-					userLookup:[
-						userDomainClassName: USER_CLASS_NAME,
-						authorityJoinClassName: JOIN_CLASS_NAME,
-						passwordPropertyName: "password",
-						usernamePropertyName: "username",
-						enabledPropertyName:"enabled",
-						authoritiesPropertyName: "authorities",
-						accountExpiredPropertyName: "accountExpired",
-						accountLockedPropertyName: "accountLocked",
-						passwordExpiredPropertyName: "passwordExpired"
-					],
-					saml:[userAttributeMappings:[username: USERNAME_ATTR_NAME]]
-				])
-
-		SpringSecurityUtils.metaClass.static.getSecurityConfig = { config }
-		config
+	static void stubTestRoleMethods() {
+		TestRole.metaClass.'static'.findWhere = {Map map -> new TestRole(authority: ROLE)}
+		TestRole.metaClass.'static'.findWhere = {new TestRole(authority: ROLE)}
 	}
 	
-	
+	// TODO: This should really be using mockFor as the stub changes based on the test
 	static void stubTestSamlUserMethods(user=null) {
+		TestSamlUser.metaClass.'static'.findWhere = {Map map -> user}
 		TestSamlUser.metaClass.'static'.findWhere = {user}
 		TestSamlUser.metaClass.'static'.withTransaction = { Closure callable ->
 			callable.call(null)
 		}
+	}
+
+	static void mockOutSpringSecurityUtilsConfig() {
+		def config = new ConfigObject()
+
+		// set spring security core configuration and saml security config
+		config.putAll([
+			authority:[nameField:"authority", className: ROLE_CLASS_NAME],
+			userLookup:[
+				userDomainClassName: USER_CLASS_NAME,
+				authorityJoinClassName: JOIN_CLASS_NAME,
+				passwordPropertyName: "password",
+				usernamePropertyName: "username",
+				enabledPropertyName:"enabled",
+				authoritiesPropertyName: "authorities",
+				accountExpiredPropertyName: "accountExpired",
+				accountLockedPropertyName: "accountLocked",
+				passwordExpiredPropertyName: "passwordExpired" ] ])
+
+		SpringSecurityUtils.metaClass.static.getSecurityConfig = { config }
 	}
 	
 	/**

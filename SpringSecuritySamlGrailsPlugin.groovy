@@ -116,6 +116,7 @@ SAML 2.x support for the Spring Security Plugin
 		SpringSecurityUtils.registerFilter 'samlLogoutProcessingFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 5
 		
 		successRedirectHandler(SavedRequestAwareAuthenticationSuccessHandler) {
+			alwaysUseDefaultTargetUrl = conf.saml.alwaysUseAfterLoginUrl ?: false
 			defaultTargetUrl = conf.saml.afterLoginUrl
 		}
 		

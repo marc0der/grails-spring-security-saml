@@ -213,8 +213,6 @@ SAML 2.x support for the Spring Security Plugin
 		
 		userDetailsService(SpringSamlUserDetailsService) {
 			grailsApplication = ref('grailsApplication')
-			sessionFactory = ref('sessionFactory')
-
 			authorityClassName = conf.authority.className
 			authorityJoinClassName = conf.userLookup.authorityJoinClassName
 			authorityNameField = conf.authority.nameField

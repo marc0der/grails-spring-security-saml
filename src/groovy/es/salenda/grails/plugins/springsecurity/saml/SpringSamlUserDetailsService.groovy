@@ -32,7 +32,6 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService
  * @author alvaro.sanchez
  */
 class SpringSamlUserDetailsService extends GormUserDetailsService implements SAMLUserDetailsService {
-
 	// Spring bean injected configuration parameters
 	String authorityClassName
 	String authorityJoinClassName
@@ -43,6 +42,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 	Map samlUserGroupToRoleMapping
 	String samlUserGroupAttribute
 	String userDomainClassName
+	def grailsApplication
 
 	public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 

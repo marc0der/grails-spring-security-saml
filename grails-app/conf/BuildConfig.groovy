@@ -7,7 +7,9 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.release.scm.enabled = false
 
 grails.project.dependency.resolution = {
-    inherits 'global'
+    inherits ('global') {
+		excludes "xml-apis"
+	}
 	log 'warn'
 
 	repositories {
@@ -19,7 +21,10 @@ grails.project.dependency.resolution = {
 	}
 
     dependencies {
-		build "org.apache.ivy:ivy:2.2.0"
+		build ("org.apache.ivy:ivy:2.2.0") {
+			transitive = false
+		}
+		
 		compile ('org.opensaml:opensaml:2.4.1') {
 			transitive = false
 		}
@@ -52,8 +57,7 @@ grails.project.dependency.resolution = {
     plugins {
         build(":tomcat:$grailsVersion",
               ":hibernate:$grailsVersion",
-              ":release:1.0.0.RC3",
-              ":codenarc:0.16.1") {
+              ":release:1.0.1",) {
             export = false
         }
 		

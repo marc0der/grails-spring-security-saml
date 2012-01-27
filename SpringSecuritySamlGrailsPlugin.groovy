@@ -84,7 +84,7 @@ SAML 2.x support for the Spring Security Plugin
     def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPSPRINGSECURITYSAML" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "https://github.com/marcoVermeulen/grails-spring-security-saml" ]
+    def scm = [ url: "https://github.com/fpanwaskar/grails-spring-security-saml" ]
 
 	def providers = []
 

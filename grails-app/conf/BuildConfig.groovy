@@ -60,9 +60,7 @@ grails.project.dependency.resolution = {
               ":release:1.0.1",) {
             export = false
         }
-		
-		compile ":spring-security-core:1.2.7.1"
-		
+ 	 	compile ":spring-security-core:1.2.1"
 		test ":code-coverage:1.2.5"
     }
 }

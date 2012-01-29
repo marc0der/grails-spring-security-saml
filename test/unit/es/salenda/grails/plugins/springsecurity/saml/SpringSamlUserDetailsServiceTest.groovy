@@ -157,7 +157,6 @@ class SpringSamlUserDetailsServiceTest {
 		service.samlAutoCreateKey = 'username'
 
 		setMockSamlAttributes(credential, ["$GROUP_ATTR_NAME": "something=something,CN=myGroup", "$USERNAME_ATTR_NAME": username])
-//		stubTestSamlUserMethods()
 
 		TestUserRole.metaClass.'static'.removeAll = { TestSamlUser userWithRoles ->
 			// no roles to remove

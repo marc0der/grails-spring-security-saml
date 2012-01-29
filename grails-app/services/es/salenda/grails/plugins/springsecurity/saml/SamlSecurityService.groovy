@@ -28,8 +28,7 @@ import grails.plugins.springsecurity.SpringSecurityService
 class SamlSecurityService extends SpringSecurityService {
 
 	static transactional = false
-
-	def config = SpringSecurityUtils.securityConfig
+	def config
 
 	Object getCurrentUser() {
 		def userDetails

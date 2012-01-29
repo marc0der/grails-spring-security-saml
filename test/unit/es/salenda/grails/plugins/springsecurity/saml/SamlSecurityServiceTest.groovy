@@ -1,22 +1,14 @@
 package es.salenda.grails.plugins.springsecurity.saml
 
 import static es.salenda.grails.plugins.springsecurity.saml.UnitTestUtils.*
-
-import grails.test.GrailsUnitTestCase
 import grails.test.mixin.*
-import groovy.mock.interceptor.MockFor;
 
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils;
 import org.junit.Before
 import org.junit.Test
-
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
-import org.springframework.security.authentication.AuthenticationTrustResolver;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 
 import test.TestSamlUser
 

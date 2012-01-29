@@ -16,16 +16,8 @@ class UnitTestUtils {
 	
 	static final USERNAME_ATTR_NAME = 'usernameAttribute'
 	static final GROUP_ATTR_NAME = 'groups'
-	
-	static void stubTestRoleMethods() {
-		TestRole.metaClass.'static'.findWhere = {Map map -> new TestRole(authority: ROLE)}
-		TestRole.metaClass.'static'.findWhere = {new TestRole(authority: ROLE)}
-	}
-	
-	// TODO: This should really be using mockFor as the stub changes based on the test
-	static void stubTestSamlUserMethods(user=null) {
-		TestSamlUser.metaClass.'static'.findWhere = {Map map -> user}
-		TestSamlUser.metaClass.'static'.findWhere = {user}
+
+	static void mockWithTransaction() {
 		TestSamlUser.metaClass.'static'.withTransaction = { Closure callable ->
 			callable.call(null)
 		}

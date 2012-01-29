@@ -149,13 +149,13 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 
 		if (userClazz && samlAutoCreateActive && samlAutoCreateKey 
 				&& authorityNameField && authorityJoinClassName) {
-
-			Map whereClause = [ "$samlAutoCreateKey": user."$samlAutoCreateKey" ]
-			def existingUser = userClazz.findWhere(whereClause)
-
+			
+			Map whereClause = [:]
+			whereClause.put "$samlAutoCreateKey".toString(), user."$samlAutoCreateKey"
 			Class<?> joinClass = grailsApplication.getDomainClass(authorityJoinClassName)?.clazz
 
 			userClazz.withTransaction {
+				def existingUser = userClazz.findWhere(whereClause)
 				if (!existingUser) {
 					user.save()
 				} else {
@@ -175,7 +175,8 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 		if (authority && authorityNameField && authorityClassName) {
 			Class<?> Role = grailsApplication.getDomainClass(authorityClassName).clazz
 			if ( Role ) {
-				Map whereClause = [ "$authorityNameField": authority ]
+				Map whereClause = [:]
+				whereClause.put "$authorityNameField".toString(), authority 
 				Role.findWhere(whereClause)
 			} else {
 				throw new ClassNotFoundException("domain class ${authorityClassName} not found")

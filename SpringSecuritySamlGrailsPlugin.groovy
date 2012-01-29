@@ -309,6 +309,7 @@ SAML 2.x support for the Spring Security Plugin
 		}
 		
 		springSecurityService(SamlSecurityService) {
+			config = conf
 			authenticationTrustResolver = ref('authenticationTrustResolver')
 			grailsApplication = ref('grailsApplication')
 			passwordEncoder = ref('passwordEncoder')

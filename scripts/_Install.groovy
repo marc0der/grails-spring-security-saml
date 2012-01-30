@@ -1,6 +1,7 @@
 includeTargets << new File("$springSecuritySamlPluginDir/scripts/_SamlCommon.groovy")
+includeTargets << grailsScript("_GrailsEvents")
 
-printMessage '''
+def message = '''
 *******************************************************
 * You've installed the Spring Security Saml plugin.   *
 *                                                     *
@@ -8,3 +9,4 @@ printMessage '''
 * saml-quickstart                                     *
 *******************************************************
 '''
+event("StatusFinal", [message])

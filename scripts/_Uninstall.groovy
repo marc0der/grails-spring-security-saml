@@ -1,6 +1,7 @@
 includeTargets << new File("$springSecuritySamlPluginDir/scripts/_SamlCommon.groovy")
+includeTargets << grailsScript("_GrailsEvents")
 
-printMessage '''
+def message = '''
 *******************************************************
 * You've sucessfully uninstalled the                  *
 * Spring Security Saml plugin.                        *
@@ -11,3 +12,4 @@ printMessage '''
 * manually if required.                               *
 *******************************************************
 '''
+event("StatusFinal", [message])

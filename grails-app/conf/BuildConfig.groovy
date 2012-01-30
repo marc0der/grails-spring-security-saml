@@ -56,12 +56,9 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-              ":hibernate:$grailsVersion",
-              ":release:1.0.1",) {
+              ":hibernate:$grailsVersion") {
             export = false
         }
- 	 	compile ":spring-security-core:1.2.1"
-		test ":code-coverage:1.2.5"
     }
 }
 

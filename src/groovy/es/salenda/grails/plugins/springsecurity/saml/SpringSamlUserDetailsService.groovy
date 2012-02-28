@@ -83,7 +83,6 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 				user."$key" = samlValue?.first()
 			}
 		}
-		
 		user
 	}
 

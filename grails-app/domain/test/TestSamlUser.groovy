@@ -23,6 +23,8 @@ class TestSamlUser {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	String email
+	String firstName
 
 	Set<TestRole> getAuthorities() {
 		TestUserRole.findAllByUser(this).collect { it.role } as Set
@@ -31,5 +33,7 @@ class TestSamlUser {
 	static constraints = {
 		username blank: false, unique: true
 		password blank: false
+		email nullable: true
+		firstName nullable: true
 	}
 }

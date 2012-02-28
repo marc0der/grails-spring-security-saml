@@ -16,6 +16,8 @@ class UnitTestUtils {
 	
 	static final USERNAME_ATTR_NAME = 'usernameAttribute'
 	static final GROUP_ATTR_NAME = 'groups'
+	static final MAIL_ATTR_NAME = 'mail'
+	static final FIRSTNAME_ATTR_NAME = 'firstname'
 
 	static void mockWithTransaction() {
 		TestSamlUser.metaClass.'static'.withTransaction = { Closure callable ->
@@ -71,6 +73,18 @@ class UnitTestUtils {
 				   ]
 			   ]
 		   }
+		   else if (name == MAIL_ATTR_NAME) {
+			   return [attributeValues: [
+					   [value: attributes.get("${MAIL_ATTR_NAME}")]
+				   ]
+			   ]
+		   }
+		   else if (name == FIRSTNAME_ATTR_NAME) {
+				return [attributeValues: [
+						   [value: attributes.get("${FIRSTNAME_ATTR_NAME}")]
+					   ]
+				   ]
+			}
 		   else if (name == GROUP_ATTR_NAME) {
 			   return [
 				   [attributeValues: [

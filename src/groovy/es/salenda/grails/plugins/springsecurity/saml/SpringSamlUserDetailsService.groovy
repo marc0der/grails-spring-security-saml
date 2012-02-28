@@ -14,9 +14,6 @@
  */
 package es.salenda.grails.plugins.springsecurity.saml
 
-import java.util.Collection
-import java.util.Set
-
 import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
 import org.springframework.beans.BeanUtils
 import org.springframework.security.core.GrantedAuthority
@@ -53,6 +50,7 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 			}
 
 			def user = generateSecurityUser(username)
+			user = mapAdditionalAttributes(credential, user)
 			if (user) {
 				log.debug "Loading database roles for $username..."
 				def authorities = getAuthoritiesForUser(credential)
@@ -75,6 +73,18 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 			// if no mapping provided for username attribute then assume it is the returned subject in the assertion
 			return credential.nameID?.value
 		}
+	}
+	
+	protected Object mapAdditionalAttributes(credential, user) {
+		samlUserAttributeMappings.each { key, value ->
+			def attribute = credential.getAttributeByName(value)
+			def samlValue = attribute?.attributeValues?.value
+			if (samlValue) {
+				user."$key" = samlValue?.first()
+			}
+		}
+		
+		user
 	}
 
 	protected Collection<GrantedAuthority> getAuthoritiesForUser(SAMLCredential credential) {
@@ -159,7 +169,8 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 				if (!existingUser) {
 					user.save()
 				} else {
-					user = existingUser
+					user = updateUserProperties(existingUser, user)
+
 					joinClass.removeAll user
 				}
 
@@ -170,6 +181,13 @@ class SpringSamlUserDetailsService extends GormUserDetailsService implements SAM
 			}
 		}
 	}
+
+    private Object updateUserProperties(existingUser, user) {
+        samlUserAttributeMappings.each { key, value ->
+            existingUser."$key" = user."$key"
+        }
+        return existingUser
+    }
 	
 	private Object getRole(String authority) {
 		if (authority && authorityNameField && authorityClassName) {

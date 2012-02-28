@@ -10,3 +10,6 @@ spring-security-saml-*-plugin.xml
 spring-security-saml-*.pom
 .DS_Store
 web-app/
+*.iws
+*.ipr
+*.iml

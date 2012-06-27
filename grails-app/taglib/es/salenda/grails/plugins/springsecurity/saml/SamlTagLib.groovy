@@ -49,7 +49,10 @@ class SamlTagLib extends SecurityTagLib {
 			url += "?idp=${grailsApplication.config.grails.plugins.springsecurity.saml.metadata.providers[defaultIdp]}"
 		}
 
-		out << "<a href='${url}'>${body()}</a>"
+		def elementClass = generateClassAttribute(attrs)
+		def elementId = generateIdAttribute(attrs)
+
+		out << "<a href='${url}'${elementId}${elementClass}>${body()}</a>"
 	}
 
 	/**
@@ -60,6 +63,25 @@ class SamlTagLib extends SecurityTagLib {
 		def contextPath = request.contextPath
 		def url = SAMLLogoutFilter.DEFAULT_FILTER_URL
 
-		out << "<a href='${contextPath}${url}${local?'?local=true':''}'>${body()}</a>"
+		def elementClass = generateClassAttribute(attrs)
+		def elementId = generateIdAttribute(attrs)
+
+		out << """<a href='${contextPath}${url}${local?'?local=true':''}'${elementId}${elementClass}>${body()}</a>"""
+	}
+
+	private String generateIdAttribute(Map attrs) {
+		def elementId = ""
+		if (attrs.id) {
+			elementId = " id=\'${attrs.id}\'"
+		}
+		elementId
+	}
+
+	private String generateClassAttribute(Map attrs) {
+		def elementClass = ""
+		if (attrs.class) {
+			elementClass = " class=\'${attrs.class}\'"
+		}
+		elementClass
 	}
 }

@@ -19,6 +19,10 @@ import org.springframework.security.saml.SAMLLogoutFilter
 
 class SamlTagLib extends SecurityTagLib {
 
+	static final String LOGOUT_SLUG = '/j_spring_security_logout'
+
+	def grailsApplication
+
 	/**
 	 * {@inheritDocs}
 	 */
@@ -61,7 +65,13 @@ class SamlTagLib extends SecurityTagLib {
 	def logoutLink = { attrs, body ->
 		def local = attrs.remove('local')
 		def contextPath = request.contextPath
-		def url = SAMLLogoutFilter.DEFAULT_FILTER_URL
+
+		def url = LOGOUT_SLUG
+
+		def samlEnabled = grailsApplication.config.grails.plugins.springsecurity.saml.active
+		if(samlEnabled){
+			url = SAMLLogoutFilter.DEFAULT_FILTER_URL
+		}
 
 		def elementClass = generateClassAttribute(attrs)
 		def elementId = generateIdAttribute(attrs)

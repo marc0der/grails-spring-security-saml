@@ -9,7 +9,7 @@ import org.junit.Ignore
 class SamlTagLibTests {
 
 	@Test
-	@Ignore("currently has a bug and requires rework (no yak shave)grta")
+	@Ignore("currently has a bug and requires rework (no yak shave)")
 	void loginLinkRendersCorrectUrl() {
 		def expectedLink = '<a href=\'/saml/login\'>login</a>'
 		assert applyTemplate('<sec:loginLink>Logout</sec:loginLink>') == expectedLink
@@ -40,12 +40,23 @@ class SamlTagLibTests {
 
 	@Test
 	void logoutLinkShouldRenderCorrectUrl() {
+		mockConfig()
+
 		def expectedLink = '<a href=\'/saml/logout\'>Logout</a>'
 		assert applyTemplate('<sec:logoutLink>Logout</sec:logoutLink>') == expectedLink
 	}
 
 	@Test
+	void logouLinkShouldDefaultToCoreLogoutUrl() {
+		mockConfig(false)
+
+		def expectedLink = "<a href=\'${SamlTagLib.LOGOUT_SLUG}\'>Logout</a>"
+		assert applyTemplate('<sec:logoutLink>Logout</sec:logoutLink>') == expectedLink
+	}
+
+	@Test
 	void logoutLinkShouldSetBody() {
+		mockConfig()
 		def body = "Logout here"
 
 		def expectedLink = "<a href=\'/saml/logout\'>${body}</a>"
@@ -54,6 +65,7 @@ class SamlTagLibTests {
 
 	@Test
 	void logoutLinkShouldSetClassAttribute() {
+		mockConfig()
 		def expectedClass = 'logoutBtn link'
 
 		def expectedLink = "<a href=\'/saml/logout\' class=\'$expectedClass\'>Logout</a>"
@@ -62,9 +74,17 @@ class SamlTagLibTests {
 
 	@Test
 	void logoutLinkShouldSetIdAttribute() {
+		mockConfig()
 		def expectedId = 'logoutBtn'
 
 		def expectedLink = "<a href=\'/saml/logout\' id=\'$expectedId\'>Logout</a>"
 		assert applyTemplate("<sec:logoutLink id=\'${expectedId}\'>Logout</sec:logoutLink>") == expectedLink
+	}
+
+	private void mockConfig(boolean samlActive=true) {
+		SamlTagLib.metaClass.getGrailsApplication = {->
+			return [config:
+					[grails: [plugins: [springsecurity: [saml: [active: samlActive]]]]]]
+		}
 	}
 }

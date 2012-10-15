@@ -16,12 +16,13 @@ package es.salenda.grails.plugins.springsecurity.saml
 
 import grails.plugins.springsecurity.SecurityTagLib
 import org.springframework.security.saml.SAMLLogoutFilter
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class SamlTagLib extends SecurityTagLib {
 
 	static final String LOGOUT_SLUG = '/j_spring_security_logout'
 
-	def grailsApplication
+	GrailsApplication grailsApplication
 
 	/**
 	 * {@inheritDocs}
